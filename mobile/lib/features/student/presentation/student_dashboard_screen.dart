@@ -172,11 +172,16 @@ class StudentDashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Quick Stats Grid: Attendance & Fees
+                  // Quick Stats Grid: Attendance & Fees (Matching frontend Lucide design)
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final isVeryNarrow = constraints.maxWidth < 280;
                       final attendanceCard = Card(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Column(
@@ -184,14 +189,12 @@ class StudentDashboardScreen extends ConsumerWidget {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.event_available,
-                                      color: AppTheme.studentAccent,
-                                      size: 18),
-                                  const SizedBox(width: 6),
+                                  AppIcons.render(AppIcons.attendance, size: 20),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Text('Attendance',
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.plusJakartaSans(
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
                                             color: AppTheme.textMuted)),
@@ -204,7 +207,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   '${att.percentage}%',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.plusJakartaSans(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w800,
                                       color: AppTheme.textDark),
@@ -213,7 +216,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                               const SizedBox(height: 4),
                               Text(
                                 'Present: ${att.present} / ${att.total} days',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10, color: AppTheme.textMuted),
                               ),
                             ],
@@ -222,6 +225,11 @@ class StudentDashboardScreen extends ConsumerWidget {
                       );
 
                       final feeCard = Card(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Column(
@@ -229,18 +237,12 @@ class StudentDashboardScreen extends ConsumerWidget {
                             children: [
                               Row(
                                 children: [
-                                  Icon(
-                                    Icons.account_balance_wallet_outlined,
-                                    color: fees.pendingAmount > 0
-                                        ? AppTheme.errorRed
-                                        : AppTheme.successGreen,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 6),
+                                  AppIcons.render(AppIcons.fees, size: 20),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Text('Fee Status',
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.plusJakartaSans(
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
                                             color: AppTheme.textMuted)),

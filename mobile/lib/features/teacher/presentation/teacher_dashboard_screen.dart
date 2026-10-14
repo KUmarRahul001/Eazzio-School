@@ -160,12 +160,17 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Homeroom Class Quick Stats
+                // Homeroom Class Quick Stats (Academic Sapphire Design)
                 if (data.hasHomeroom) ...[
                   Row(
                     children: [
                       Expanded(
                         child: Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(16),
                             child: Column(
@@ -173,16 +178,15 @@ class TeacherDashboardScreen extends ConsumerWidget {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(Icons.groups_outlined,
-                                        color: AppTheme.teacherAccent,
-                                        size: 20),
-                                    const SizedBox(width: 6),
+                                    AppIcons.render(AppIcons.profile, size: 20),
+                                    const SizedBox(width: 8),
                                     Flexible(
                                       child: Text(
                                         'Students',
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.plusJakartaSans(
                                             fontSize: 12,
+                                            fontWeight: FontWeight.w600,
                                             color: AppTheme.textMuted),
                                       ),
                                     ),
@@ -191,13 +195,13 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   '${data.studentCount ?? 0}',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.plusJakartaSans(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.textDark),
                                 ),
                                 Text(data.assignedCourse,
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.plusJakartaSans(
                                         fontSize: 11,
                                         color: AppTheme.textMuted)),
                               ],
@@ -208,6 +212,11 @@ class TeacherDashboardScreen extends ConsumerWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(16),
                             child: Column(
@@ -215,15 +224,15 @@ class TeacherDashboardScreen extends ConsumerWidget {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(Icons.pie_chart_outline,
-                                        color: AppTheme.successGreen, size: 20),
-                                    const SizedBox(width: 6),
+                                    AppIcons.render(AppIcons.attendance, size: 20),
+                                    const SizedBox(width: 8),
                                     Flexible(
                                       child: Text(
                                         'Class Attendance',
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.plusJakartaSans(
                                             fontSize: 12,
+                                            fontWeight: FontWeight.w600,
                                             color: AppTheme.textMuted),
                                       ),
                                     ),
@@ -232,13 +241,13 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   '${data.courseAttendanceRate ?? 0}%',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.plusJakartaSans(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.successGreen),
                                 ),
                                 Text('Recent average',
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.plusJakartaSans(
                                         fontSize: 11,
                                         color: AppTheme.textMuted)),
                               ],
