@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/theme/app_icons.dart';
 import '../models/auth_user.dart';
 import 'auth_controller.dart';
 
@@ -161,6 +162,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               title: 'Student Portal',
                               subtitle: 'ID or Roll No.',
                               icon: Icons.school_outlined,
+                              customIcon: AppIcons.studentPortal,
                               isSelected: !isTeacher,
                               activeColor: AppTheme.studentAccent,
                               onTap: () {
@@ -177,6 +179,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               title: 'Teacher Portal',
                               subtitle: 'Faculty & Staff',
                               icon: Icons.menu_book_rounded,
+                              customIcon: AppIcons.teacherPortal,
                               isSelected: isTeacher,
                               activeColor: AppTheme.teacherAccent,
                               onTap: () {
@@ -203,19 +206,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               Row(
                                 children: [
                                   CircleAvatar(
-                                    radius: 16,
+                                    radius: 18,
                                     backgroundColor: (isTeacher
                                             ? AppTheme.teacherAccent
                                             : AppTheme.studentAccent)
                                         .withValues(alpha: 0.12),
-                                    child: Icon(
+                                    child: AppIcons.render(
                                       isTeacher
-                                          ? Icons.person_search
-                                          : Icons.account_circle_outlined,
-                                      size: 18,
-                                      color: isTeacher
-                                          ? AppTheme.teacherAccent
-                                          : AppTheme.studentAccent,
+                                          ? AppIcons.teacherPortal
+                                          : AppIcons.studentPortal,
+                                      size: 24,
                                     ),
                                   ),
                                   const SizedBox(width: 10),
@@ -477,6 +477,7 @@ class _PortalChoiceCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final String? customIcon;
   final bool isSelected;
   final Color activeColor;
   final VoidCallback onTap;
@@ -485,6 +486,7 @@ class _PortalChoiceCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
+    this.customIcon,
     required this.isSelected,
     required this.activeColor,
     required this.onTap,
@@ -510,12 +512,29 @@ class _PortalChoiceCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              size: 28,
-              color: isSelected ? activeColor : AppTheme.textMuted,
-            ),
-            const SizedBox(height: 6),
+            if (customIcon != null)
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: activeColor.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          )
+                        ]
+                      : null,
+                ),
+                child: AppIcons.render(customIcon!, size: 36),
+              )
+            else
+              Icon(
+                icon,
+                size: 28,
+                color: isSelected ? activeColor : AppTheme.textMuted,
+              ),
+            const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,

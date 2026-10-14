@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/theme/app_icons.dart';
 import 'package:eazzio_school/core/config/app_config.dart';
 import '../data/student_repository.dart';
 import '../models/student_models.dart';
@@ -324,7 +325,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                           SizedBox(
                             width: itemWidth,
                             child: _StudentWorkspaceCard(
-                              icon: Icons.school_outlined,
+                              customAsset: AppIcons.courses,
                               title: 'Class Details',
                               subtitle: 'Faculty & Routine',
                               color: AppTheme.studentAccent,
@@ -339,7 +340,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                           SizedBox(
                             width: itemWidth,
                             child: _StudentWorkspaceCard(
-                              icon: Icons.campaign_outlined,
+                              customAsset: AppIcons.notices,
                               title: 'Notice Board',
                               subtitle: 'Circulars & Notes',
                               color: const Color(0xFFD97706),
@@ -354,7 +355,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                           SizedBox(
                             width: itemWidth,
                             child: _StudentWorkspaceCard(
-                              icon: Icons.calendar_month_outlined,
+                              customAsset: AppIcons.routine,
                               title: 'Exam Schedule',
                               subtitle: 'Published Datesheets',
                               color: const Color(0xFF0284C7),
@@ -369,7 +370,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                           SizedBox(
                             width: itemWidth,
                             child: _StudentWorkspaceCard(
-                              icon: Icons.emoji_events_outlined,
+                              customAsset: AppIcons.results,
                               title: 'Report Cards',
                               subtitle: 'Grades & Results',
                               color: const Color(0xFF16A34A),
@@ -561,14 +562,14 @@ class StudentDashboardScreen extends ConsumerWidget {
 }
 
 class _StudentWorkspaceCard extends StatelessWidget {
-  final IconData icon;
+  final String customAsset;
   final String title;
   final String subtitle;
   final Color color;
   final VoidCallback onTap;
 
   const _StudentWorkspaceCard({
-    required this.icon,
+    required this.customAsset,
     required this.title,
     required this.subtitle,
     required this.color,
@@ -590,11 +591,7 @@ class _StudentWorkspaceCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: color.withValues(alpha: 0.12),
-                child: Icon(icon, color: color, size: 20),
-              ),
+              AppIcons.render(customAsset, size: 36),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(

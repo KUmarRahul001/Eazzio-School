@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/theme/app_icons.dart';
 import 'student_dashboard_screen.dart';
 import 'student_attendance_screen.dart';
 import 'student_routine_screen.dart';
@@ -45,47 +46,89 @@ class _StudentMainScreenState extends State<StudentMainScreen> {
             _currentIndex = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined, size: 20),
-            selectedIcon:
-                Icon(Icons.dashboard, color: AppTheme.studentAccent, size: 20),
+            icon: AppIcons.render(AppIcons.studentPortal, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.studentAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.studentPortal, size: 22),
+            ),
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.calendar_today_outlined, size: 20),
-            selectedIcon: Icon(Icons.calendar_today,
-                color: AppTheme.studentAccent, size: 20),
+            icon: AppIcons.render(AppIcons.attendance, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.studentAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.attendance, size: 22),
+            ),
             label: 'Roll',
           ),
           NavigationDestination(
-            icon: Icon(Icons.schedule_outlined, size: 20),
-            selectedIcon:
-                Icon(Icons.schedule, color: AppTheme.studentAccent, size: 20),
+            icon: AppIcons.render(AppIcons.routine, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.studentAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.routine, size: 22),
+            ),
             label: 'Routine',
           ),
           NavigationDestination(
-            icon: Icon(Icons.assignment_outlined, size: 20),
-            selectedIcon:
-                Icon(Icons.assignment, color: AppTheme.studentAccent, size: 20),
+            icon: AppIcons.render(AppIcons.assignments, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.studentAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.assignments, size: 22),
+            ),
             label: 'Tasks',
           ),
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined, size: 20),
-            selectedIcon: Icon(Icons.receipt_long,
-                color: AppTheme.studentAccent, size: 20),
+            icon: AppIcons.render(AppIcons.fees, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.studentAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.fees, size: 22),
+            ),
             label: 'Fees',
           ),
           NavigationDestination(
-            icon: Icon(Icons.grade_outlined, size: 20),
-            selectedIcon:
-                Icon(Icons.grade, color: AppTheme.studentAccent, size: 20),
+            icon: AppIcons.render(AppIcons.results, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.studentAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.results, size: 22),
+            ),
             label: 'Results',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline, size: 20),
-            selectedIcon:
-                Icon(Icons.person, color: AppTheme.studentAccent, size: 20),
+            icon: AppIcons.render(AppIcons.profile, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.studentAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.profile, size: 22),
+            ),
             label: 'Profile',
           ),
         ],

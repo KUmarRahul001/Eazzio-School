@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/theme/app_icons.dart';
 import 'teacher_dashboard_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_assignments_screen.dart';
@@ -33,36 +34,72 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
+        height: 64,
         indicatorColor: AppTheme.teacherAccent.withValues(alpha: 0.15),
         onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard, color: AppTheme.teacherAccent),
+            icon: AppIcons.render(AppIcons.teacherPortal, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.teacherAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.teacherPortal, size: 22),
+            ),
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.how_to_reg_outlined),
-            selectedIcon: Icon(Icons.how_to_reg, color: AppTheme.teacherAccent),
+            icon: AppIcons.render(AppIcons.attendance, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.teacherAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.attendance, size: 22),
+            ),
             label: 'Attendance',
           ),
           NavigationDestination(
-            icon: Icon(Icons.assignment_outlined),
-            selectedIcon: Icon(Icons.assignment, color: AppTheme.teacherAccent),
+            icon: AppIcons.render(AppIcons.assignments, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.teacherAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.assignments, size: 22),
+            ),
             label: 'Homework',
           ),
           NavigationDestination(
-            icon: Icon(Icons.schedule_outlined),
-            selectedIcon: Icon(Icons.schedule, color: AppTheme.teacherAccent),
+            icon: AppIcons.render(AppIcons.routine, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.teacherAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.routine, size: 22),
+            ),
             label: 'Routine',
           ),
           NavigationDestination(
-            icon: Icon(Icons.grade_outlined),
-            selectedIcon: Icon(Icons.grade, color: AppTheme.teacherAccent),
+            icon: AppIcons.render(AppIcons.marks, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.teacherAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.marks, size: 22),
+            ),
             label: 'Marks',
           ),
         ],

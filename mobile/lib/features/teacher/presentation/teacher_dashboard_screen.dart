@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/theme/app_icons.dart';
 import '../data/teacher_repository.dart';
 import '../models/teacher_models.dart';
 import 'teacher_courses_screen.dart';
@@ -272,7 +273,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _QuickActionCard(
-                            icon: Icons.groups_rounded,
+                            customAsset: AppIcons.courses,
                             title: 'My Courses',
                             subtitle: 'Rosters & Student Info',
                             color: AppTheme.teacherAccent,
@@ -286,7 +287,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _QuickActionCard(
-                            icon: Icons.history_rounded,
+                            customAsset: AppIcons.attendance,
                             title: 'Attendance Log',
                             subtitle: 'Historical Records',
                             color: const Color(0xFF0284C7),
@@ -301,7 +302,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _QuickActionCard(
-                            icon: Icons.campaign_rounded,
+                            customAsset: AppIcons.notices,
                             title: 'Notice Board',
                             subtitle: 'Circulars & Circulars',
                             color: const Color(0xFFD97706),
@@ -315,7 +316,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _QuickActionCard(
-                            icon: Icons.chat_bubble_outline_rounded,
+                            customAsset: AppIcons.feedback,
                             title: 'Feedback',
                             subtitle: 'Remarks & Notes',
                             color: const Color(0xFF16A34A),
@@ -427,14 +428,14 @@ class TeacherDashboardScreen extends ConsumerWidget {
 }
 
 class _QuickActionCard extends StatelessWidget {
-  final IconData icon;
+  final String customAsset;
   final String title;
   final String subtitle;
   final Color color;
   final VoidCallback onTap;
 
   const _QuickActionCard({
-    required this.icon,
+    required this.customAsset,
     required this.title,
     required this.subtitle,
     required this.color,
@@ -456,11 +457,7 @@ class _QuickActionCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: color.withValues(alpha: 0.12),
-                child: Icon(icon, color: color, size: 20),
-              ),
+              AppIcons.render(customAsset, size: 36),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
