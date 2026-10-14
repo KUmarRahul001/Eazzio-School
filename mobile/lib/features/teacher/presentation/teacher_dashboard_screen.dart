@@ -251,21 +251,37 @@ class TeacherDashboardScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // Quick Workspaces & Courseroom Actions (Matching Web Portal)
+                // Courseroom Workspaces (Academic Sapphire Design)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Courseroom Workspaces',
-                      style: GoogleFonts.inter(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                    Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E3A8A),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Courseroom Workspaces',
+                          style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textDark),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final itemWidth = (constraints.maxWidth - 12) / 2;
+                    final useTwoCols = constraints.maxWidth >= 330;
+                    final itemWidth = useTwoCols ? (constraints.maxWidth - 12) / 2 : constraints.maxWidth;
                     return Wrap(
                       spacing: 12,
                       runSpacing: 10,
@@ -275,8 +291,9 @@ class TeacherDashboardScreen extends ConsumerWidget {
                           child: _QuickActionCard(
                             customAsset: AppIcons.courses,
                             title: 'My Courses',
-                            subtitle: 'Rosters & Student Info',
-                            color: AppTheme.teacherAccent,
+                            subtitle: 'Roster Directory',
+                            badgeText: data.hasHomeroom ? 'Homeroom' : null,
+                            color: const Color(0xFF1E3A8A),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -290,7 +307,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                             customAsset: AppIcons.attendance,
                             title: 'Attendance Log',
                             subtitle: 'Historical Records',
-                            color: const Color(0xFF0284C7),
+                            badgeText: null,
+                            color: const Color(0xFF0D9488),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -304,8 +322,9 @@ class TeacherDashboardScreen extends ConsumerWidget {
                           child: _QuickActionCard(
                             customAsset: AppIcons.notices,
                             title: 'Notice Board',
-                            subtitle: 'Circulars & Circulars',
-                            color: const Color(0xFFD97706),
+                            subtitle: 'Announcements',
+                            badgeText: null,
+                            color: const Color(0xFF0284C7),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -319,6 +338,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                             customAsset: AppIcons.feedback,
                             title: 'Feedback',
                             subtitle: 'Remarks & Notes',
+                            badgeText: null,
                             color: const Color(0xFF16A34A),
                             onTap: () => Navigator.push(
                               context,
@@ -332,66 +352,195 @@ class TeacherDashboardScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
                 // Today's Routine
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
+                    Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E3A8A),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Today's Schedule",
+                          style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textDark),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE5EEFF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       child: Text(
-                        "Today's Teaching Schedule",
-                        style: GoogleFonts.inter(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
+                        DateFormat('EEEE, MMM d').format(DateTime.now()),
+                        style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: const Color(0xFF1E3A8A),
+                            fontWeight: FontWeight.w600),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(DateFormat('EEEE').format(DateTime.now()),
-                        style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: AppTheme.teacherAccent,
-                            fontWeight: FontWeight.bold)),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
 
                 if (data.routine.isEmpty)
                   Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(24),
                       child: Center(
-                        child: Text('No classes assigned for today.',
-                            style:
-                                GoogleFonts.inter(color: AppTheme.textMuted)),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.wb_sunny_outlined,
+                                size: 40, color: Color(0xFFF59E0B)),
+                            const SizedBox(height: 10),
+                            Text('Free Day! No teaching periods today.',
+                                style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textDark,
+                                    fontSize: 14)),
+                            const SizedBox(height: 4),
+                            Text('Use this time for lesson planning or grading.',
+                                style: GoogleFonts.plusJakartaSans(
+                                    color: AppTheme.textMuted, fontSize: 12)),
+                          ],
+                        ),
                       ),
                     ),
                   )
                 else
-                  ...data.routine.map((r) => Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor:
-                                AppTheme.teacherAccent.withValues(alpha: 0.12),
-                            child: Text(r.period,
-                                style: GoogleFonts.inter(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.teacherAccent)),
-                          ),
-                          title: Text(r.subject,
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600)),
-                          subtitle: Text(
-                              'Class: ${r.courseName ?? "Assigned Class"} ${r.roomNo != null ? "• Room: ${r.roomNo}" : ""}',
-                              style: GoogleFonts.inter(
-                                  fontSize: 12, color: AppTheme.textMuted)),
-                          trailing: (r.startTime != null && r.endTime != null)
-                              ? Text('${r.startTime} - ${r.endTime}',
-                                  style: GoogleFonts.inter(fontSize: 11))
-                              : null,
+                  ...data.routine.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final r = entry.value;
+                    final isOngoing = idx == 0;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isOngoing ? const Color(0xFF90A8FF) : const Color(0xFFE2E8F0),
+                          width: isOngoing ? 1.5 : 1,
                         ),
-                      )),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: isOngoing
+                                    ? const Color(0xFF1E3A8A)
+                                    : const Color(0xFFEFF4FF),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                r.period,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: isOngoing ? Colors.white : const Color(0xFF1E3A8A),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          r.subject,
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                            color: AppTheme.textDark,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (isOngoing)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFCCFBF1),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            'Active Class',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                              color: const Color(0xFF0F766E),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Class: ${r.courseName ?? "Assigned Class"} ${r.roomNo != null ? "• Room ${r.roomNo}" : ""}',
+                                    style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12, color: AppTheme.textMuted),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (r.startTime != null && r.endTime != null) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                ),
+                                child: Text(
+                                  '${r.startTime}\n${r.endTime}',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF475569),
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
 
                 const SizedBox(height: 16),
 
@@ -431,6 +580,7 @@ class _QuickActionCard extends StatelessWidget {
   final String customAsset;
   final String title;
   final String subtitle;
+  final String? badgeText;
   final Color color;
   final VoidCallback onTap;
 
@@ -438,6 +588,7 @@ class _QuickActionCard extends StatelessWidget {
     required this.customAsset,
     required this.title,
     required this.subtitle,
+    this.badgeText,
     required this.color,
     required this.onTap,
   });
@@ -446,15 +597,16 @@ class _QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         side: const BorderSide(color: Color(0xFFE2E8F0)),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Row(
             children: [
               AppIcons.render(customAsset, size: 36),
@@ -462,18 +614,52 @@ class _QuickActionCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold, fontSize: 13),
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: AppTheme.textDark,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (badgeText != null) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE5EEFF),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              badgeText!,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1E3A8A),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: GoogleFonts.inter(
-                          fontSize: 10, color: AppTheme.textMuted),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        color: AppTheme.textMuted,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
