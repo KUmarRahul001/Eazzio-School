@@ -494,22 +494,39 @@ class StudentDashboardScreen extends ConsumerWidget {
                           child: Row(
                             children: [
                               Container(
-                                width: 44,
-                                height: 44,
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: isOngoing
                                       ? const Color(0xFF1E3A8A)
                                       : const Color(0xFFEFF4FF),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                                 alignment: Alignment.center,
-                                child: Text(
-                                  r.period,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    color: isOngoing ? Colors.white : const Color(0xFF1E3A8A),
-                                  ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Period',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w600,
+                                        color: isOngoing
+                                            ? Colors.white.withValues(alpha: 0.8)
+                                            : const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                    Text(
+                                      r.period.replaceAll(RegExp(r'[^0-9]'), '').isNotEmpty
+                                          ? r.period.replaceAll(RegExp(r'[^0-9]'), '')
+                                          : r.period,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        height: 1.1,
+                                        color: isOngoing ? Colors.white : const Color(0xFF1E3A8A),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -527,32 +544,37 @@ class StudentDashboardScreen extends ConsumerWidget {
                                               fontSize: 14,
                                               color: AppTheme.textDark,
                                             ),
+                                            maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        if (isOngoing)
+                                        if (isOngoing) ...[
+                                          const SizedBox(width: 6),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                             decoration: BoxDecoration(
                                               color: const Color(0xFFCCFBF1),
                                               borderRadius: BorderRadius.circular(6),
                                             ),
                                             child: Text(
-                                              'Active Now',
+                                              'Active',
                                               style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 10,
+                                                fontSize: 9,
                                                 fontWeight: FontWeight.w700,
                                                 color: const Color(0xFF0F766E),
                                               ),
                                             ),
                                           ),
+                                        ],
                                       ],
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 3),
                                     Text(
-                                      'Teacher: ${r.teacherName ?? "Faculty"} ${r.roomNo != null ? "• Room ${r.roomNo}" : ""}',
+                                      'Teacher: ${r.teacherName ?? "Faculty"}${r.roomNo != null ? " • Room ${r.roomNo}" : ""}',
                                       style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 12, color: AppTheme.textMuted),
+                                          fontSize: 11, color: AppTheme.textMuted),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
