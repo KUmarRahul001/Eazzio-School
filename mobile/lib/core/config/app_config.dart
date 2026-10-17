@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 class AppConfig {
   // Configurable base URL
@@ -9,7 +8,7 @@ class AppConfig {
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
-    return kIsWeb ? 'http://localhost:5000/api' : 'http://10.0.2.2:5000/api';
+    return 'http://100.124.111.44:5000/api';
   }
 
   static String baseUrl = defaultBaseUrl;

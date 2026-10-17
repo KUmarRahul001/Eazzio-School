@@ -22,17 +22,21 @@ class ApiClient {
       ),
     );
 
-    dio.interceptors.add(
-      LogInterceptor(
-        request: true,
-        requestHeader: true,
-        requestBody: true,
-        responseHeader: false,
-        responseBody: true,
-        error: true,
-        logPrint: (obj) => debugPrint('🌐 [DIO] $obj'),
-      ),
-    );
+    // Only enable minimal logging in debug mode without sensitive body/token payload leaks
+    if (kDebugMode) {
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            debugPrint('🌐 [HTTP] ${options.method} ${options.path}');
+            return handler.next(options);
+          },
+          onError: (DioException e, handler) {
+            debugPrint('❌ [HTTP ERROR] ${e.requestOptions.path} [${e.response?.statusCode}]');
+            return handler.next(e);
+          },
+        ),
+      );
+    }
 
     dio.interceptors.add(
       InterceptorsWrapper(
@@ -44,8 +48,6 @@ class ApiClient {
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
-          debugPrint(
-              '❌ [DIO ERROR] ${e.requestOptions.uri} -> ${e.type}: ${e.message}');
           if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
             // Check if it's an unauthenticated token expiration
             if (e.requestOptions.path != '/auth/login') {
@@ -66,23 +68,59 @@ class ApiClient {
 
   String parseErrorMessage(dynamic error) {
     if (error is DioException) {
-      if (error.response?.data != null) {
-        final data = error.response?.data;
-        if (data is Map && data.containsKey('error')) {
-          return data['error'].toString();
-        } else if (data is Map && data.containsKey('message')) {
-          return data['message'].toString();
+      final statusCode = error.response?.statusCode;
+      if (statusCode != null) {
+        if (statusCode == 401 || statusCode == 403) {
+          return 'Access denied or session expired. Please sign in again.';
+        }
+        if (statusCode == 404) {
+          return 'The requested resource was not found.';
+        }
+        if (statusCode >= 500) {
+          return 'Service temporarily unavailable. Please try again later.';
         }
       }
+
+      if (error.response?.data != null) {
+        final data = error.response?.data;
+        String? msg;
+        if (data is Map) {
+          if (data.containsKey('error') && data['error'] is String) {
+            msg = data['error'] as String;
+          } else if (data.containsKey('message') && data['message'] is String) {
+            msg = data['message'] as String;
+          }
+        }
+        if (msg != null && msg.isNotEmpty) {
+          // Guard against raw SQL/Prisma or internal stack trace leaks
+          final lower = msg.toLowerCase();
+          if (lower.contains('prisma') ||
+              lower.contains('sql') ||
+              lower.contains('database') ||
+              lower.contains('syntax') ||
+              lower.contains('column') ||
+              lower.contains('table') ||
+              lower.contains('exception') ||
+              lower.contains('stack') ||
+              lower.contains('query') ||
+              lower.contains('neon') ||
+              lower.contains('jwt')) {
+            return 'An unexpected error occurred. Please try again.';
+          }
+          return msg;
+        }
+      }
+
       if (error.type == DioExceptionType.connectionTimeout ||
-          error.type == DioExceptionType.receiveTimeout) {
-        return 'Connection timed out. Please check your network.';
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout) {
+        return 'Connection timed out. Please try again.';
       }
       if (error.type == DioExceptionType.connectionError) {
-        return 'Could not connect to server. Please check the backend URL and network connection.';
+        return 'Unable to connect to server. Please check your network connection.';
       }
-      return error.message ?? 'A network error occurred';
+      return 'Unable to complete request. Please try again.';
     }
-    return error.toString();
+    return 'An unexpected error occurred. Please try again.';
   }
 }

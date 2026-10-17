@@ -6,6 +6,7 @@ import 'teacher_attendance_screen.dart';
 import 'teacher_assignments_screen.dart';
 import 'teacher_routine_screen.dart';
 import 'teacher_marks_screen.dart';
+import 'teacher_profile_screen.dart';
 
 class TeacherMainScreen extends StatefulWidget {
   const TeacherMainScreen({super.key});
@@ -23,6 +24,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
     TeacherAssignmentsScreen(),
     TeacherRoutineScreen(),
     TeacherMarksScreen(),
+    TeacherProfileScreen(),
   ];
 
   @override
@@ -36,6 +38,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         selectedIndex: _currentIndex,
         height: 64,
         indicatorColor: AppTheme.teacherAccent.withValues(alpha: 0.15),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
@@ -64,7 +67,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
               ),
               child: AppIcons.render(AppIcons.attendance, size: 22),
             ),
-            label: 'Attendance',
+            label: 'Roll',
           ),
           NavigationDestination(
             icon: AppIcons.render(AppIcons.assignments, size: 22),
@@ -76,7 +79,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
               ),
               child: AppIcons.render(AppIcons.assignments, size: 22),
             ),
-            label: 'Homework',
+            label: 'Tasks',
           ),
           NavigationDestination(
             icon: AppIcons.render(AppIcons.routine, size: 22),
@@ -101,6 +104,18 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
               child: AppIcons.render(AppIcons.marks, size: 22),
             ),
             label: 'Marks',
+          ),
+          NavigationDestination(
+            icon: AppIcons.render(AppIcons.profile, size: 22),
+            selectedIcon: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.teacherAccent.withValues(alpha: 0.2),
+              ),
+              child: AppIcons.render(AppIcons.profile, size: 22),
+            ),
+            label: 'Profile',
           ),
         ],
       ),

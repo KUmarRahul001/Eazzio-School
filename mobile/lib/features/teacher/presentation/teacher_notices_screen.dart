@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'teacher_dashboard_screen.dart';
 
@@ -33,7 +34,7 @@ class TeacherNoticesScreen extends ConsumerWidget {
         ],
       ),
       body: noticesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 90),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (notices) {
           if (notices.isEmpty) {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/teacher_models.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_dashboard_screen.dart';
@@ -47,7 +48,7 @@ class _TeacherAttendanceHistoryScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load dates: $e')),
+          const SnackBar(content: Text('Unable to load attendance dates. Please try again.')),
         );
       }
     } finally {
@@ -69,7 +70,7 @@ class _TeacherAttendanceHistoryScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load attendance records: $e')),
+          const SnackBar(content: Text('Unable to load attendance records. Please try again.')),
         );
       }
     } finally {
@@ -86,7 +87,7 @@ class _TeacherAttendanceHistoryScreenState
         title: const Text('Attendance History'),
       ),
       body: classesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 100),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (classes) {
           if (classes.isEmpty) {
@@ -215,7 +216,7 @@ class _TeacherAttendanceHistoryScreenState
               // Records Table
               Expanded(
                 child: _isLoadingRecords
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const SkeletonListLoader(itemCount: 6, itemHeight: 70)
                     : _records.isEmpty
                         ? Center(
                             child: Text(

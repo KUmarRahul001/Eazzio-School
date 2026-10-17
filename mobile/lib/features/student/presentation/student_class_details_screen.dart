@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import 'student_profile_screen.dart';
 import 'student_routine_screen.dart';
 
@@ -27,7 +28,7 @@ class StudentClassDetailsScreen extends ConsumerWidget {
         ],
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 110),
         error: (err, _) => Center(child: Text('Error loading class: $err')),
         data: (profile) {
           final course = profile.course;

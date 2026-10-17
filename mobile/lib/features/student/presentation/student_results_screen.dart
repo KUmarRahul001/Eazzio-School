@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
@@ -86,7 +87,7 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen>
   Widget _buildTimetablesTab(
       AsyncValue<List<ExamTimetableItem>> timetablesAsync) {
     return timetablesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 90),
       error: (err, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -261,7 +262,7 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen>
 
   Widget _buildResultsTab(AsyncValue<StudentResultGroup> resultsAsync) {
     return resultsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 120),
       error: (err, _) => Center(child: Text('Error loading results: $err')),
       data: (group) {
         if (group.resultOnHold) {

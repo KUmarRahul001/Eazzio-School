@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
@@ -47,7 +48,7 @@ class StudentRoutineScreen extends ConsumerWidget {
           ],
         ),
         body: routineAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 85),
           error: (err, _) => Center(child: Text('Error loading routine: $err')),
           data: (routineMap) {
             return TabBarView(

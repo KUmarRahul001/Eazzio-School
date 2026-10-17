@@ -52,7 +52,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Could not download PDF attachment: $e';
+          _errorMessage = 'Unable to download attachment. Please try again later.';
         });
       }
     }

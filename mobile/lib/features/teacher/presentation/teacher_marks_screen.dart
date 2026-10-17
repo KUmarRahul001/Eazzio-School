@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/teacher_models.dart';
 import 'teacher_dashboard_screen.dart';
 import 'teacher_attendance_screen.dart';
@@ -75,7 +76,7 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error loading marks sheet: $e')));
+            const SnackBar(content: Text('Unable to load marks sheet. Please try again.')));
       }
     } finally {
       if (mounted) setState(() => _isLoadingSheet = false);
@@ -147,8 +148,8 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to save marks: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unable to save marks. Please try again.')));
       }
     } finally {
       if (mounted) setState(() => _isSavingMarks = false);
@@ -188,7 +189,8 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
                 DropdownButtonFormField<int>(
                   initialValue: selectedCourseId,
                   isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Class / Course'),
+                  decoration:
+                      const InputDecoration(labelText: 'Class / Course'),
                   items: classes.map((c) {
                     return DropdownMenuItem(
                       value: c.courseId,
@@ -215,11 +217,16 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
                   isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Exam Type'),
                   items: const [
-                    DropdownMenuItem(value: 'WEEKLY', child: Text('Weekly Test')),
-                    DropdownMenuItem(value: 'SURPRISE', child: Text('Surprise Test')),
-                    DropdownMenuItem(value: 'GENERAL', child: Text('General Exam')),
-                    DropdownMenuItem(value: 'HALF_YEARLY', child: Text('Half-Yearly Exam')),
-                    DropdownMenuItem(value: 'ANNUAL', child: Text('Annual Exam')),
+                    DropdownMenuItem(
+                        value: 'WEEKLY', child: Text('Weekly Test')),
+                    DropdownMenuItem(
+                        value: 'SURPRISE', child: Text('Surprise Test')),
+                    DropdownMenuItem(
+                        value: 'GENERAL', child: Text('General Exam')),
+                    DropdownMenuItem(
+                        value: 'HALF_YEARLY', child: Text('Half-Yearly Exam')),
+                    DropdownMenuItem(
+                        value: 'ANNUAL', child: Text('Annual Exam')),
                   ],
                   onChanged: (val) {
                     if (val != null) {
@@ -242,7 +249,8 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
                     Expanded(
                       child: TextField(
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(labelText: 'Max Marks'),
+                        decoration:
+                            const InputDecoration(labelText: 'Max Marks'),
                         controller: TextEditingController(text: '50'),
                         onChanged: (val) {
                           final p = double.tryParse(val);
@@ -256,9 +264,12 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
                         initialValue: term,
                         decoration: const InputDecoration(labelText: 'Term'),
                         items: const [
-                          DropdownMenuItem(value: 'Term 1', child: Text('Term 1')),
-                          DropdownMenuItem(value: 'Term 2', child: Text('Term 2')),
-                          DropdownMenuItem(value: 'Annual', child: Text('Annual')),
+                          DropdownMenuItem(
+                              value: 'Term 1', child: Text('Term 1')),
+                          DropdownMenuItem(
+                              value: 'Term 2', child: Text('Term 2')),
+                          DropdownMenuItem(
+                              value: 'Annual', child: Text('Annual')),
                         ],
                         onChanged: (val) {
                           if (val != null) setDialogState(() => term = val);
@@ -316,7 +327,7 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to create exam: $e')),
+                      const SnackBar(content: Text('Unable to create exam. Please try again.')),
                     );
                   }
                 }
@@ -349,7 +360,7 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
         ],
       ),
       body: examsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 120),
         error: (err, _) => Center(child: Text('Error loading exams: $err')),
         data: (exams) {
           if (exams.isEmpty) {
@@ -438,7 +449,7 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
               // Marks Entry List
               Expanded(
                 child: _isLoadingSheet
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const SkeletonListLoader(itemCount: 6, itemHeight: 80)
                     : _selectedExam == null
                         ? Center(
                             child: Text(

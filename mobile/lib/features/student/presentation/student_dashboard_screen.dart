@@ -6,10 +6,13 @@ import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
 import 'package:eazzio_school/core/theme/app_icons.dart';
 import 'package:eazzio_school/core/config/app_config.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../data/student_repository.dart';
 import '../models/student_models.dart';
 import 'package:eazzio_school/features/shared/presentation/pdf_viewer_screen.dart';
+import 'package:eazzio_school/core/services/notification_service.dart';
 import 'student_notices_screen.dart';
+import 'notice_details_screen.dart';
 import 'student_class_details_screen.dart';
 import 'student_results_screen.dart';
 
@@ -21,7 +24,25 @@ final studentRepositoryProvider = Provider<StudentRepository>((ref) {
 final studentDashboardProvider =
     FutureProvider.autoDispose<StudentDashboardData>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
-  return await repo.getDashboardSummary();
+  final data = await repo.getDashboardSummary();
+
+  // If there are notices, show native push notification for the newest one if not seen
+  if (data.notices.isNotEmpty) {
+    final newest = data.notices.first;
+    await NotificationService.showNotificationIfNew(
+      id: newest.id,
+      title: 'New Notice: ${newest.title}',
+      body: newest.content,
+    );
+  }
+
+  return data;
+});
+
+final unreadNoticesProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final dashboard = await ref.watch(studentDashboardProvider.future);
+  final noticeIds = dashboard.notices.map((n) => n.id).toList();
+  return await NotificationService.hasUnreadNotices(noticeIds);
 });
 
 class StudentDashboardScreen extends ConsumerWidget {
@@ -31,6 +52,17 @@ class StudentDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardAsync = ref.watch(studentDashboardProvider);
     final user = ref.watch(authNotifierProvider).user;
+    final dashboardData = dashboardAsync.valueOrNull;
+
+    // Resolve student display name cleanly: dashboard profile name -> auth user name -> 'Student'
+    final displayName = (dashboardData?.profile.name.trim().isNotEmpty ?? false)
+        ? dashboardData!.profile.name.trim()
+        : (user?.name.trim().isNotEmpty ?? false)
+            ? user!.name.trim()
+            : 'Student';
+
+    final unreadNoticesAsync = ref.watch(unreadNoticesProvider);
+    final hasUnreadNotices = unreadNoticesAsync.valueOrNull ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -40,48 +72,40 @@ class StudentDashboardScreen extends ConsumerWidget {
             Text('Student Portal',
                 style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(user?.name ?? 'Student',
+            Text(displayName,
                 style:
                     GoogleFonts.inter(fontSize: 12, color: AppTheme.textMuted)),
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.refresh(studentDashboardProvider),
+          _NotificationIconButton(
+            hasNewNotification: hasUnreadNotices,
+            onPressed: () async {
+              if (dashboardData != null && dashboardData.notices.isNotEmpty) {
+                await NotificationService.markNoticesAsSeen(
+                    dashboardData.notices.map((n) => n.id).toList());
+                ref.refresh(unreadNoticesProvider);
+              }
+              if (context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const StudentNoticesScreen()),
+                );
+              }
+            },
           ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppTheme.errorRed),
-            tooltip: 'Sign Out',
+            icon: const Icon(Icons.refresh),
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Confirm Logout'),
-                  content: const Text(
-                      'Are you sure you want to sign out of Student Portal?'),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancel')),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.errorRed),
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        ref.read(authNotifierProvider.notifier).logout();
-                      },
-                      child: const Text('Logout'),
-                    ),
-                  ],
-                ),
-              );
+              ref.refresh(studentDashboardProvider);
+              ref.refresh(unreadNoticesProvider);
             },
           ),
         ],
       ),
       body: dashboardAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonDashboardLoader(),
         error: (err, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -141,7 +165,11 @@ class StudentDashboardScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  profile.name,
+                                  profile.name.trim().isNotEmpty
+                                      ? profile.name.trim()
+                                      : (user?.name.trim().isNotEmpty ?? false)
+                                          ? user!.name.trim()
+                                          : 'Student',
                                   style: GoogleFonts.inter(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -189,7 +217,8 @@ class StudentDashboardScreen extends ConsumerWidget {
                             children: [
                               Row(
                                 children: [
-                                  AppIcons.render(AppIcons.attendance, size: 20),
+                                  AppIcons.render(AppIcons.attendance,
+                                      size: 20),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text('Attendance',
@@ -321,7 +350,9 @@ class StudentDashboardScreen extends ConsumerWidget {
                     builder: (context, constraints) {
                       // On mobile screens (< 380px), single column or responsive grid
                       final useTwoCols = constraints.maxWidth >= 330;
-                      final itemWidth = useTwoCols ? (constraints.maxWidth - 12) / 2 : constraints.maxWidth;
+                      final itemWidth = useTwoCols
+                          ? (constraints.maxWidth - 12) / 2
+                          : constraints.maxWidth;
                       return Wrap(
                         spacing: 12,
                         runSpacing: 10,
@@ -348,7 +379,9 @@ class StudentDashboardScreen extends ConsumerWidget {
                               customAsset: AppIcons.notices,
                               title: 'Notice Board',
                               subtitle: 'Circulars & Notes',
-                              badgeText: data.notices.isNotEmpty ? '${data.notices.length} New' : null,
+                              badgeText: data.notices.isNotEmpty
+                                  ? '${data.notices.length} New'
+                                  : null,
                               color: const Color(0xFF0D9488),
                               onTap: () => Navigator.push(
                                 context,
@@ -421,7 +454,8 @@ class StudentDashboardScreen extends ConsumerWidget {
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE5EEFF),
                           borderRadius: BorderRadius.circular(20),
@@ -459,7 +493,8 @@ class StudentDashboardScreen extends ConsumerWidget {
                                       color: AppTheme.textDark,
                                       fontSize: 14)),
                               const SizedBox(height: 4),
-                              Text('Enjoy your study time or review your homework.',
+                              Text(
+                                  'Enjoy your study time or review your homework.',
                                   style: GoogleFonts.plusJakartaSans(
                                       color: AppTheme.textMuted, fontSize: 12)),
                             ],
@@ -478,7 +513,9 @@ class StudentDashboardScreen extends ConsumerWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: isOngoing ? const Color(0xFF90A8FF) : const Color(0xFFE2E8F0),
+                            color: isOngoing
+                                ? const Color(0xFF90A8FF)
+                                : const Color(0xFFE2E8F0),
                             width: isOngoing ? 1.5 : 1,
                           ),
                           boxShadow: [
@@ -494,7 +531,8 @@ class StudentDashboardScreen extends ConsumerWidget {
                           child: Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: isOngoing
                                       ? const Color(0xFF1E3A8A)
@@ -511,19 +549,25 @@ class StudentDashboardScreen extends ConsumerWidget {
                                         fontSize: 9,
                                         fontWeight: FontWeight.w600,
                                         color: isOngoing
-                                            ? Colors.white.withValues(alpha: 0.8)
+                                            ? Colors.white
+                                                .withValues(alpha: 0.8)
                                             : const Color(0xFF64748B),
                                       ),
                                     ),
                                     Text(
-                                      r.period.replaceAll(RegExp(r'[^0-9]'), '').isNotEmpty
-                                          ? r.period.replaceAll(RegExp(r'[^0-9]'), '')
+                                      r.period
+                                              .replaceAll(RegExp(r'[^0-9]'), '')
+                                              .isNotEmpty
+                                          ? r.period
+                                              .replaceAll(RegExp(r'[^0-9]'), '')
                                           : r.period,
                                       style: GoogleFonts.plusJakartaSans(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
                                         height: 1.1,
-                                        color: isOngoing ? Colors.white : const Color(0xFF1E3A8A),
+                                        color: isOngoing
+                                            ? Colors.white
+                                            : const Color(0xFF1E3A8A),
                                       ),
                                     ),
                                   ],
@@ -551,14 +595,17 @@ class StudentDashboardScreen extends ConsumerWidget {
                                         if (isOngoing) ...[
                                           const SizedBox(width: 6),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 6, vertical: 2),
                                             decoration: BoxDecoration(
                                               color: const Color(0xFFCCFBF1),
-                                              borderRadius: BorderRadius.circular(6),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
                                             ),
                                             child: Text(
                                               'Active',
-                                              style: GoogleFonts.plusJakartaSans(
+                                              style:
+                                                  GoogleFonts.plusJakartaSans(
                                                 fontSize: 9,
                                                 fontWeight: FontWeight.w700,
                                                 color: const Color(0xFF0F766E),
@@ -572,7 +619,8 @@ class StudentDashboardScreen extends ConsumerWidget {
                                     Text(
                                       'Teacher: ${r.teacherName ?? "Faculty"}${r.roomNo != null ? " • Room ${r.roomNo}" : ""}',
                                       style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11, color: AppTheme.textMuted),
+                                          fontSize: 11,
+                                          color: AppTheme.textMuted),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -582,11 +630,13 @@ class StudentDashboardScreen extends ConsumerWidget {
                               if (r.startTime != null && r.endTime != null) ...[
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF8FAFC),
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    border: Border.all(
+                                        color: const Color(0xFFE2E8F0)),
                                   ),
                                   child: Text(
                                     '${r.startTime}\n${r.endTime}',
@@ -652,6 +702,12 @@ class StudentDashboardScreen extends ConsumerWidget {
                     ...data.notices.map((n) => Card(
                           margin: const EdgeInsets.only(bottom: 8),
                           child: ListTile(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => NoticeDetailsScreen(notice: n),
+                              ),
+                            ),
                             leading: const Icon(Icons.campaign_outlined,
                                 color: AppTheme.studentAccent),
                             title: Text(n.title,
@@ -802,3 +858,109 @@ class _StudentWorkspaceCard extends StatelessWidget {
     );
   }
 }
+
+class _NotificationIconButton extends StatefulWidget {
+  final bool hasNewNotification;
+  final VoidCallback onPressed;
+
+  const _NotificationIconButton({
+    required this.hasNewNotification,
+    required this.onPressed,
+  });
+
+  @override
+  State<_NotificationIconButton> createState() =>
+      _NotificationIconButtonState();
+}
+
+class _NotificationIconButtonState extends State<_NotificationIconButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _blinkController;
+
+  @override
+  void initState() {
+    super.initState();
+    _blinkController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    if (widget.hasNewNotification) {
+      _blinkController.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _NotificationIconButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.hasNewNotification != oldWidget.hasNewNotification) {
+      if (widget.hasNewNotification) {
+        _blinkController.repeat(reverse: true);
+      } else {
+        _blinkController.stop();
+        _blinkController.value = 0.0;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _blinkController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+      child: Material(
+        color: const Color(0xFFFEF2F2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(color: Color(0xFFFECACA), width: 1),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: widget.onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.hasNewNotification)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: FadeTransition(
+                      opacity: _blinkController,
+                      child: Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.errorRed,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                const Icon(
+                  Icons.notifications_active_outlined,
+                  size: 16,
+                  color: Color(0xFFDC2626),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Notices',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFB91C1C),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

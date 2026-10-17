@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:eazzio_school/core/config/app_config.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'teacher_dashboard_screen.dart';
@@ -111,6 +112,15 @@ class TeacherProfileScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.info_outline, color: AppTheme.textMuted),
+              title: const Text('App Version'),
+              trailing: Text(AppConfig.appVersion,
+                  style: GoogleFonts.inter(color: AppTheme.textMuted)),
             ),
           ),
           const SizedBox(height: 24),

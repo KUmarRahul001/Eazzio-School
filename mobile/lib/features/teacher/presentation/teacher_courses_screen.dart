@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/teacher_models.dart';
 import 'teacher_attendance_screen.dart';
 
@@ -39,7 +40,7 @@ class _TeacherCoursesScreenState extends ConsumerState<TeacherCoursesScreen> {
         ],
       ),
       body: classesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 90),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (classes) {
           if (classes.isEmpty) {

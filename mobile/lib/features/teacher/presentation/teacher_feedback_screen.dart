@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_dashboard_screen.dart';
 
@@ -124,8 +125,8 @@ class _TeacherFeedbackScreenState extends ConsumerState<TeacherFeedbackScreen> {
                           } catch (e) {
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text('Error adding feedback: $e')),
+                                const SnackBar(
+                                    content: Text('Unable to submit feedback. Please try again.')),
                               );
                             }
                           } finally {
@@ -164,7 +165,7 @@ class _TeacherFeedbackScreenState extends ConsumerState<TeacherFeedbackScreen> {
         onPressed: _showCreateFeedbackDialog,
       ),
       body: feedbackAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 95),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (feedbacks) {
           if (feedbacks.isEmpty) {

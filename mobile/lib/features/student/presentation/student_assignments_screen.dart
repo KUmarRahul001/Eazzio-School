@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:eazzio_school/core/config/app_config.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 import 'package:eazzio_school/features/shared/presentation/pdf_viewer_screen.dart';
@@ -32,7 +33,7 @@ class StudentAssignmentsScreen extends ConsumerWidget {
         ],
       ),
       body: assignmentsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 100),
         error: (err, _) =>
             Center(child: Text('Error loading assignments: $err')),
         data: (assignments) {

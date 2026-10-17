@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:eazzio_school/features/auth/models/auth_user.dart';
+import 'package:eazzio_school/features/auth/presentation/role_selection_screen.dart';
 import 'package:eazzio_school/features/auth/presentation/login_screen.dart';
 import 'package:eazzio_school/features/student/models/student_models.dart';
 import 'package:eazzio_school/features/teacher/models/teacher_models.dart';
@@ -33,7 +34,26 @@ void main() {
   });
 
   testWidgets(
-      'Shared login screen renders Student and Teacher portal selectors side by side',
+      'RoleSelectionScreen renders Student and Teacher account selectors side by side',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: RoleSelectionScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify side-by-side role selectors exist on the screen
+    expect(find.text('Student\nLogin'), findsOneWidget);
+    expect(find.text('Teacher\nLogin'), findsOneWidget);
+    expect(find.text('Welcome Back'), findsOneWidget);
+  });
+
+  testWidgets(
+      'LoginScreen renders portal badge and login form cleanly',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(
@@ -45,20 +65,9 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Verify side-by-side portal selectors exist on the shared screen
     expect(find.text('Student Portal'), findsOneWidget);
-    expect(find.text('Teacher Portal'), findsOneWidget);
-    expect(find.text('Eazzio-School'), findsOneWidget);
-
-    // Verify initial student sign in header
-    expect(find.text('Student Sign In'), findsOneWidget);
-
-    // Tap on Teacher Portal
-    await tester.tap(find.text('Teacher Portal'));
-    await tester.pumpAndSettle();
-
-    // Verify dynamic switch to Teacher Sign In within the same screen
-    expect(find.text('Teacher Sign In'), findsOneWidget);
+    expect(find.text('Welcome Back!'), findsOneWidget);
+    expect(find.text('Sign In'), findsOneWidget);
   });
 
   test('FeeInvoiceItem pending amount and paid calculations', () {
@@ -366,15 +375,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify portal selectors and initial Student header exist without any overflow
     expect(find.text('Student Portal'), findsOneWidget);
-    expect(find.text('Teacher Portal'), findsOneWidget);
-    expect(find.text('Student Sign In'), findsOneWidget);
-
-    // Tap Teacher Portal to verify dynamic switch and teacher layout on narrow width
-    await tester.tap(find.text('Teacher Portal'));
-    await tester.pumpAndSettle();
-    expect(find.text('Teacher Sign In'), findsOneWidget);
+    expect(find.text('Sign In'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
@@ -394,8 +397,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Student Portal'), findsOneWidget);
-    expect(find.text('Teacher Portal'), findsOneWidget);
-    expect(find.text('Student Sign In'), findsOneWidget);
+    expect(find.text('Sign In'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
@@ -464,7 +467,7 @@ void main() {
       // Ensure no RenderFlex exceptions were thrown on this viewport
       expect(tester.takeException(), isNull);
       expect(find.text('Student Portal'), findsOneWidget);
-      expect(find.text('Teacher Portal'), findsOneWidget);
+      expect(find.text('Sign In'), findsOneWidget);
     }
   });
 }

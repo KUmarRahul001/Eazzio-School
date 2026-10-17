@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
+import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
@@ -19,87 +22,118 @@ class StudentFeesScreen extends ConsumerStatefulWidget {
 }
 
 class _StudentFeesScreenState extends ConsumerState<StudentFeesScreen> {
+  late Razorpay _razorpay;
   bool _isProcessing = false;
+  int? _activeInvoiceId;
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    final invoiceId = _activeInvoiceId;
+    if (invoiceId == null) return;
+
+    setState(() => _isProcessing = true);
+    try {
+      final repo = ref.read(studentRepositoryProvider);
+      final verified = await repo.verifyPayment(
+        invoiceId: invoiceId,
+        razorpayOrderId: response.orderId ?? '',
+        razorpayPaymentId: response.paymentId ?? '',
+        razorpaySignature: response.signature ?? '',
+      );
+
+      if (mounted) {
+        if (verified) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: AppTheme.successGreen,
+              content: Text('Payment verified and updated successfully!'),
+            ),
+          );
+          ref.refresh(studentFeesProvider);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: AppTheme.errorRed,
+              content: Text('Payment received but signature verification failed on server.'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment verification failed. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (mounted) {
+      setState(() => _isProcessing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: AppTheme.errorRed,
+          content: Text('Payment could not be completed. Please try again.'),
+        ),
+      );
+    }
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('External Wallet Selected: ${response.walletName}')),
+      );
+    }
+  }
 
   Future<void> _handlePayment(FeeInvoiceItem invoice) async {
     setState(() => _isProcessing = true);
     try {
       final repo = ref.read(studentRepositoryProvider);
       final orderData = await repo.createFeeOrder(invoice.id);
+      final authUser = ref.read(authNotifierProvider).user;
 
-      if (!mounted) return;
+      _activeInvoiceId = invoice.id;
 
-      // Show payment gateway dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.payment, color: AppTheme.primaryBlue),
-              SizedBox(width: 8),
-              Text('Razorpay Gateway'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Invoice: ${invoice.invoiceNumber}',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-              Text('Fee Type: ${invoice.feeType}'),
-              const SizedBox(height: 8),
-              Text(
-                'Amount to Pay: ₹${invoice.pendingAmount.toStringAsFixed(0)}',
-                style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.successGreen),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Backend Razorpay order created successfully.\nOrder ID: ${orderData['orderId']}',
-                style:
-                    GoogleFonts.inter(fontSize: 12, color: AppTheme.textMuted),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                _verifySimulatedPayment(invoice.id, orderData['orderId']);
-              },
-              child: const Text('Confirm Payment'),
-            ),
-          ],
-        ),
-      );
+      final options = {
+        'key': orderData['razorpayKeyId'],
+        'amount': orderData['amount'],
+        'name': 'Eazzio School',
+        'order_id': orderData['orderId'],
+        'description': '${invoice.feeType} (${invoice.invoiceNumber})',
+        'timeout': 300,
+        'prefill': {
+          'contact': authUser?.loginId ?? '',
+          'email': '',
+        },
+        'theme': {
+          'color': '#008080',
+        }
+      };
+
+      _razorpay.open(options);
     } catch (e) {
       if (mounted) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            icon: const Icon(Icons.info_outline, color: AppTheme.warningAmber, size: 36),
-            title: Text(
-              'Online Payment Unavailable',
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            content: Text(
-              'The server could not create a Razorpay payment order because RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are not configured on the backend.\n\nPlease contact the school administration or settle fees at the accounts desk.',
-              style: GoogleFonts.inter(fontSize: 14, height: 1.4),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to initiate payment. Please try again.')),
         );
       }
     } finally {
@@ -200,7 +234,7 @@ class _StudentFeesScreenState extends ConsumerState<StudentFeesScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not load receipt: $e')),
+          const SnackBar(content: Text('Unable to load receipt. Please try again.')),
         );
       }
     } finally {
@@ -208,47 +242,6 @@ class _StudentFeesScreenState extends ConsumerState<StudentFeesScreen> {
     }
   }
 
-  Future<void> _verifySimulatedPayment(int invoiceId, String orderId) async {
-    setState(() => _isProcessing = true);
-    try {
-      final repo = ref.read(studentRepositoryProvider);
-      // Generate standard verification response for backend verification
-      final paymentId = 'pay_sim_${DateTime.now().millisecondsSinceEpoch}';
-
-      // Note: Backend /api/student/fees/verify-payment requires genuine signature if RAZORPAY_KEY_SECRET is configured.
-      // If payment cannot be verified by mock signature, alert clearly.
-      final verified = await repo.verifyPayment(
-        invoiceId: invoiceId,
-        razorpayOrderId: orderId,
-        razorpayPaymentId: paymentId,
-        razorpaySignature: 'simulated_client_sig',
-      );
-
-      if (mounted) {
-        if (verified) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Payment successful and confirmed by server!')),
-          );
-          ref.refresh(studentFeesProvider);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text(
-                    'Server confirmed: Payment signature verification failed or rejected.')),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Verification notice: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isProcessing = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -265,9 +258,9 @@ class _StudentFeesScreenState extends ConsumerState<StudentFeesScreen> {
         ],
       ),
       body: _isProcessing
-          ? const Center(child: CircularProgressIndicator())
+          ? const SkeletonListLoader(itemCount: 4, itemHeight: 110)
           : feesAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 110),
               error: (err, _) =>
                   Center(child: Text('Error loading fees: $err')),
               data: (invoices) {

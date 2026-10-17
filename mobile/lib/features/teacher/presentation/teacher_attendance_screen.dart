@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:eazzio_school/core/storage/local_database_service.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/teacher_models.dart';
 import 'teacher_dashboard_screen.dart';
 
@@ -91,10 +92,10 @@ class _TeacherAttendanceScreenState
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             backgroundColor: AppTheme.warningAmber,
             content: Text(
-                'Server submission failed ($e). Draft saved to offline queue.'),
+                'Network unavailable. Draft saved locally to offline queue.'),
           ),
         );
       }
@@ -243,13 +244,43 @@ class _TeacherAttendanceScreenState
         ],
       ),
       body: classesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 120),
         error: (err, _) => Center(child: Text('Error loading classes: $err')),
         data: (classes) {
           if (classes.isEmpty) {
             return Center(
-              child: Text('No assigned classes found.',
-                  style: GoogleFonts.inter(color: AppTheme.textMuted)),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.class_outlined,
+                        size: 48, color: AppTheme.textMuted.withValues(alpha: 0.5)),
+                    const SizedBox(height: 12),
+                    Text('No assigned classes found.',
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textMuted)),
+                    const SizedBox(height: 6),
+                    Text(
+                      'You do not have any homeroom or course subject classes assigned yet.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                          fontSize: 13, color: AppTheme.textMuted),
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Refresh'),
+                      onPressed: () {
+                        ref.refresh(teacherClassesProvider);
+                        _refreshPendingDrafts();
+                      },
+                    ),
+                  ],
+                ),
+              ),
             );
           }
 

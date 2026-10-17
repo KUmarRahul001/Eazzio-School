@@ -4,8 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:eazzio_school/core/config/app_config.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
+import 'package:eazzio_school/core/services/notification_service.dart';
 import 'package:eazzio_school/features/shared/presentation/pdf_viewer_screen.dart';
+import 'notice_details_screen.dart';
 import 'student_dashboard_screen.dart';
 
 final studentAllNoticesProvider =
@@ -32,9 +35,12 @@ class StudentNoticesScreen extends ConsumerWidget {
         ],
       ),
       body: noticesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 95),
         error: (err, _) => Center(child: Text('Error loading notices: $err')),
         data: (notices) {
+          if (notices.isNotEmpty) {
+            NotificationService.markNoticesAsSeen(notices.map((n) => n.id).toList());
+          }
           if (notices.isEmpty) {
             return Center(
               child: Column(
@@ -76,10 +82,18 @@ class StudentNoticesScreen extends ConsumerWidget {
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => NoticeDetailsScreen(notice: n),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -149,9 +163,10 @@ class StudentNoticesScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-              );
-            },
-          );
+              ),
+            );
+          },
+        );
         },
       ),
     );

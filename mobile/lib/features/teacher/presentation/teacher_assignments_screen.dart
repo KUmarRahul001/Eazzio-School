@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/teacher_models.dart';
 import 'teacher_dashboard_screen.dart';
 import 'teacher_attendance_screen.dart';
@@ -131,7 +132,7 @@ class _TeacherAssignmentsScreenState
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
+                      const SnackBar(content: Text('Unable to create assignment. Please try again.')),
                     );
                   }
                 }
@@ -168,7 +169,7 @@ class _TeacherAssignmentsScreenState
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: assignmentsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 110),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (assignments) {
           if (assignments.isEmpty) {
@@ -248,7 +249,7 @@ class _TeacherAssignmentsScreenState
                                     ref.refresh(teacherAssignmentsProvider);
                                   } catch (e) {
                                     messenger.showSnackBar(
-                                        SnackBar(content: Text('Error: $e')));
+                                        const SnackBar(content: Text('Unable to delete assignment. Please try again.')));
                                   }
                                 }
                               },

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
 import 'package:eazzio_school/core/theme/app_icons.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../data/teacher_repository.dart';
 import '../models/teacher_models.dart';
 import 'teacher_courses_screen.dart';
@@ -47,49 +48,14 @@ class TeacherDashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            tooltip: 'Faculty Profile',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const TeacherProfileScreen()),
-            ),
-          ),
-          IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
             onPressed: () => ref.refresh(teacherDashboardProvider),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppTheme.errorRed),
-            tooltip: 'Sign Out',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Confirm Logout'),
-                  content: const Text(
-                      'Are you sure you want to sign out of Teacher Portal?'),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancel')),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.errorRed),
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        ref.read(authNotifierProvider.notifier).logout();
-                      },
-                      child: const Text('Logout'),
-                    ),
-                  ],
-                ),
-              );
-            },
           ),
         ],
       ),
       body: dashboardAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonDashboardLoader(),
         error: (err, _) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -113,48 +79,58 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 // Faculty Profile Card
                 Card(
                   color: AppTheme.teacherAccent,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.white.withValues(alpha: 0.2),
-                          child: const Icon(Icons.co_present_rounded,
-                              size: 30, color: Colors.white),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user?.name ?? 'Teacher',
-                                style: GoogleFonts.inter(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                data.hasHomeroom
-                                    ? 'Class Teacher: ${data.assignedCourse}'
-                                    : 'Subject Faculty',
-                                style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    color: Colors.white.withValues(alpha: 0.9)),
-                              ),
-                              Text(
-                                'Employee ID: ${user?.loginId ?? "EMP"}',
-                                style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    color:
-                                        Colors.white.withValues(alpha: 0.75)),
-                              ),
-                            ],
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const TeacherProfileScreen()),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.white.withValues(alpha: 0.2),
+                            child: const Icon(Icons.co_present_rounded,
+                                size: 30, color: Colors.white),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user?.name ?? 'Teacher',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  data.hasHomeroom
+                                      ? 'Class Teacher: ${data.assignedCourse}'
+                                      : 'Subject Faculty',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      color: Colors.white.withValues(alpha: 0.9)),
+                                ),
+                                Text(
+                                  'Employee ID: ${user?.loginId ?? "EMP"}',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color:
+                                          Colors.white.withValues(alpha: 0.75)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right,
+                              color: Colors.white70, size: 24),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -224,7 +200,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                               children: [
                                 Row(
                                   children: [
-                                    AppIcons.render(AppIcons.attendance, size: 20),
+                                    AppIcons.render(AppIcons.attendance,
+                                        size: 20),
                                     const SizedBox(width: 8),
                                     Flexible(
                                       child: Text(
@@ -290,7 +267,9 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final useTwoCols = constraints.maxWidth >= 330;
-                    final itemWidth = useTwoCols ? (constraints.maxWidth - 12) / 2 : constraints.maxWidth;
+                    final itemWidth = useTwoCols
+                        ? (constraints.maxWidth - 12) / 2
+                        : constraints.maxWidth;
                     return Wrap(
                       spacing: 12,
                       runSpacing: 10,
@@ -388,7 +367,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE5EEFF),
                         borderRadius: BorderRadius.circular(20),
@@ -426,7 +406,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                     color: AppTheme.textDark,
                                     fontSize: 14)),
                             const SizedBox(height: 4),
-                            Text('Use this time for lesson planning or grading.',
+                            Text(
+                                'Use this time for lesson planning or grading.',
                                 style: GoogleFonts.plusJakartaSans(
                                     color: AppTheme.textMuted, fontSize: 12)),
                           ],
@@ -445,7 +426,9 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: isOngoing ? const Color(0xFF90A8FF) : const Color(0xFFE2E8F0),
+                          color: isOngoing
+                              ? const Color(0xFF90A8FF)
+                              : const Color(0xFFE2E8F0),
                           width: isOngoing ? 1.5 : 1,
                         ),
                         boxShadow: [
@@ -461,7 +444,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 8),
                               decoration: BoxDecoration(
                                 color: isOngoing
                                     ? const Color(0xFF1E3A8A)
@@ -483,14 +467,19 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                     ),
                                   ),
                                   Text(
-                                    r.period.replaceAll(RegExp(r'[^0-9]'), '').isNotEmpty
-                                        ? r.period.replaceAll(RegExp(r'[^0-9]'), '')
+                                    r.period
+                                            .replaceAll(RegExp(r'[^0-9]'), '')
+                                            .isNotEmpty
+                                        ? r.period
+                                            .replaceAll(RegExp(r'[^0-9]'), '')
                                         : r.period,
                                     style: GoogleFonts.plusJakartaSans(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
                                       height: 1.1,
-                                      color: isOngoing ? Colors.white : const Color(0xFF1E3A8A),
+                                      color: isOngoing
+                                          ? Colors.white
+                                          : const Color(0xFF1E3A8A),
                                     ),
                                   ),
                                 ],
@@ -518,10 +507,12 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                       if (isOngoing) ...[
                                         const SizedBox(width: 6),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
                                             color: const Color(0xFFCCFBF1),
-                                            borderRadius: BorderRadius.circular(6),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
                                           ),
                                           child: Text(
                                             'Active',
@@ -539,7 +530,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                   Text(
                                     'Class: ${r.courseName ?? "Assigned Class"}${r.roomNo != null ? " • Room ${r.roomNo}" : ""}',
                                     style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 11, color: AppTheme.textMuted),
+                                        fontSize: 11,
+                                        color: AppTheme.textMuted),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -549,11 +541,13 @@ class TeacherDashboardScreen extends ConsumerWidget {
                             if (r.startTime != null && r.endTime != null) ...[
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF8FAFC),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  border: Border.all(
+                                      color: const Color(0xFFE2E8F0)),
                                 ),
                                 child: Text(
                                   '${r.startTime}\n${r.endTime}',

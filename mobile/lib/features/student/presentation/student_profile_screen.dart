@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'package:eazzio_school/core/config/app_config.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
+import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
@@ -82,7 +83,7 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+                    const SnackBar(content: Text('Failed to update password. Please check your current password.')),
                   );
                 }
               }
@@ -137,7 +138,7 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error updating phone: $e')),
+                    const SnackBar(content: Text('Unable to update phone number. Please try again.')),
                   );
                 }
               }
@@ -158,8 +159,8 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
         title: const Text('Student Profile & Settings'),
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 90),
+        error: (err, _) => const Center(child: Text('Unable to load profile. Please pull to refresh.')),
         data: (profile) {
           return ListView(
             padding: const EdgeInsets.all(16),

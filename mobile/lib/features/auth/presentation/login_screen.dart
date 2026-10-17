@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:eazzio_school/core/theme/app_theme.dart';
-import 'package:eazzio_school/core/theme/app_icons.dart';
+import 'package:go_router/go_router.dart';
+import 'package:eazzio_school/core/config/app_config.dart';
 import '../models/auth_user.dart';
 import 'auth_controller.dart';
 
@@ -13,16 +13,37 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _loginIdController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  late AnimationController _animController;
+  late Animation<double> _fadeAnim;
+  late Animation<Offset> _slideAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeIn);
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutQuad));
+    _animController.forward();
+  }
+
   @override
   void dispose() {
     _loginIdController.dispose();
     _passwordController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
@@ -36,232 +57,251 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
   }
 
+  void _showApiSettingsDialog() {
+    final controller = TextEditingController(text: AppConfig.baseUrl);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'API Server Settings',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Set backend base URL (e.g. http://100.124.111.44:5000/api):',
+              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade700),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: 'Base URL',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF008080),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () {
+              AppConfig.setBaseUrl(controller.text.trim());
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('API URL updated: ${AppConfig.baseUrl}')),
+              );
+            },
+            child: const Text('Save', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final isTeacher = authState.selectedPortal == UserRole.teacher;
 
+    final theme = isTeacher
+        ? const _RoleVisual(
+            portalTag: 'Teacher Portal',
+            welcomeTitle: 'Welcome, Teacher!',
+            welcomeSubtitle: 'Sign in to manage classes and students',
+            accentColor: Color(0xFF008080),
+            bgColor: Color(0xFFE6F5F5),
+            icon: Icons.groups_rounded,
+          )
+        : const _RoleVisual(
+            portalTag: 'Student Portal',
+            welcomeTitle: 'Welcome Back!',
+            welcomeSubtitle: 'Sign in to access your classes and grades',
+            accentColor: Color(0xFF2563EB),
+            bgColor: Color(0xFFEFF6FF),
+            icon: Icons.school_rounded,
+          );
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background soft gradient
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFF1F5F9), Color(0xFFE2E8F0)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Security Badge
-                    Center(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Column(
+                children: [
+                  const SizedBox(height: 8),
+
+                  // Header Bar: Back button, Logo, and Settings button
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/');
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: theme.bgColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: theme.accentColor.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 16,
+                            color: theme.accentColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          height: 48,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: _showApiSettingsDialog,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.settings_outlined,
+                            size: 20,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Login Form Card with Slide & Fade Animation
+                  SlideTransition(
+                    position: _slideAnim,
+                    child: FadeTransition(
+                      opacity: _fadeAnim,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 5),
+                        padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.lock_outline,
-                                size: 14, color: AppTheme.successGreen),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                '256-bit Encrypted Session',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.textMuted,
-                                ),
-                              ),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: const Color(0xFFE4E4EC),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 24,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // App Logo & Header
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.06),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        height: 54,
-                        width: 54,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.school,
-                            size: 48, color: AppTheme.primaryBlue),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Eazzio-School',
-                      style: GoogleFonts.inter(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.textDark,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    Text(
-                      'Campus Management System',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: AppTheme.textMuted,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // MANDATORY PRODUCT REQUIREMENT:
-                    // Shared login screen with TWO portal choices side by side
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          // Student Portal Card
-                          Expanded(
-                            child: _PortalChoiceCard(
-                              title: 'Student Portal',
-                              subtitle: 'ID or Roll No.',
-                              icon: Icons.school_outlined,
-                              customIcon: AppIcons.studentPortal,
-                              isSelected: !isTeacher,
-                              activeColor: AppTheme.studentAccent,
-                              onTap: () {
-                                ref
-                                    .read(authNotifierProvider.notifier)
-                                    .selectPortal(UserRole.student);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          // Teacher Portal Card
-                          Expanded(
-                            child: _PortalChoiceCard(
-                              title: 'Teacher Portal',
-                              subtitle: 'Faculty & Staff',
-                              icon: Icons.menu_book_rounded,
-                              customIcon: AppIcons.teacherPortal,
-                              isSelected: isTeacher,
-                              activeColor: AppTheme.teacherAccent,
-                              onTap: () {
-                                ref
-                                    .read(authNotifierProvider.notifier)
-                                    .selectPortal(UserRole.teacher);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Login Card
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
                         child: Form(
                           key: _formKey,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: (isTeacher
-                                            ? AppTheme.teacherAccent
-                                            : AppTheme.studentAccent)
-                                        .withValues(alpha: 0.12),
-                                    child: AppIcons.render(
-                                      isTeacher
-                                          ? AppIcons.teacherPortal
-                                          : AppIcons.studentPortal,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      isTeacher
-                                          ? 'Teacher Sign In'
-                                          : 'Student Sign In',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppTheme.textDark,
+                              // Portal Badge Tag
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: theme.bgColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(theme.icon,
+                                        size: 13, color: theme.accentColor),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        theme.portalTag,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: theme.accentColor,
+                                        ),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 18),
+                              const SizedBox(height: 14),
+
+                              // Welcome Title & Subtitle
+                              Text(
+                                theme.welcomeTitle,
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF000000),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                theme.welcomeSubtitle,
+                                style: GoogleFonts.inter(
+                                  color: Colors.black.withValues(alpha: 0.6),
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 22),
 
                               // Error Alert if any
                               if (authState.errorMessage != null) ...[
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.errorRed
-                                        .withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(10),
+                                    color: const Color(0xFFFEF2F2),
+                                    borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                        color: AppTheme.errorRed
-                                            .withValues(alpha: 0.3)),
+                                      color: const Color(0xFFE5484D).withValues(alpha: 0.3),
+                                    ),
                                   ),
                                   child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Icon(Icons.error_outline,
-                                          size: 18, color: AppTheme.errorRed),
+                                          size: 18, color: Color(0xFFE5484D)),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
                                           authState.errorMessage!,
                                           style: GoogleFonts.inter(
-                                              fontSize: 13,
-                                              color: AppTheme.errorRed,
-                                              fontWeight: FontWeight.w500),
+                                            fontSize: 13,
+                                            color: const Color(0xFFE5484D),
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -272,13 +312,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                               // Identifier Field
                               Text(
-                                isTeacher
-                                    ? 'Employee ID or Faculty Email'
-                                    : 'Student ID (e.g., STU001)',
+                                isTeacher ? 'Email Address' : 'Student ID',
                                 style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.textDark),
+                                  color: Colors.black.withValues(alpha: 0.8),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               const SizedBox(height: 6),
                               TextFormField(
@@ -286,18 +325,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 keyboardType: isTeacher
                                     ? TextInputType.emailAddress
                                     : TextInputType.text,
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                ),
                                 decoration: InputDecoration(
                                   hintText: isTeacher
-                                      ? 'teacher1@demo.com or EMP001'
-                                      : 'STU001',
-                                  prefixIcon: const Icon(Icons.badge_outlined,
-                                      size: 20),
+                                      ? 'name@school.com'
+                                      : 'e.g. STU001 or SCH001-ST0001',
+                                  hintStyle: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                  ),
+                                  prefixIcon: Icon(
+                                    isTeacher
+                                        ? Icons.mail_outline_rounded
+                                        : Icons.badge_outlined,
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                    size: 20,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 14),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFFE4E4EC), width: 1.5),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFFE4E4EC), width: 1.5),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFF008080), width: 2),
+                                  ),
                                 ),
                                 validator: (val) {
                                   if (val == null || val.trim().isEmpty) {
                                     return isTeacher
-                                        ? 'Please enter Employee ID or Email'
-                                        : 'Please enter Student ID';
+                                        ? 'Please enter your email'
+                                        : 'Please enter your Student ID';
                                   }
                                   return null;
                                 },
@@ -308,29 +379,62 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               Text(
                                 'Password',
                                 style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.textDark),
+                                  color: Colors.black.withValues(alpha: 0.8),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _passwordController,
                                 obscureText: _obscurePassword,
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                ),
                                 decoration: InputDecoration(
-                                  hintText: 'Enter your password',
-                                  prefixIcon:
-                                      const Icon(Icons.lock_outline, size: 20),
+                                  hintText: '••••••••',
+                                  hintStyle: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.lock_outline_rounded,
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                    size: 20,
+                                  ),
                                   suffixIcon: IconButton(
                                     icon: Icon(
-                                        _obscurePassword
-                                            ? Icons.visibility_off_outlined
-                                            : Icons.visibility_outlined,
-                                        size: 20),
+                                      _obscurePassword
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
+                                      color: Colors.black.withValues(alpha: 0.4),
+                                      size: 20,
+                                    ),
                                     onPressed: () {
                                       setState(() {
                                         _obscurePassword = !_obscurePassword;
                                       });
                                     },
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 14),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFFE4E4EC), width: 1.5),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFFE4E4EC), width: 1.5),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFF008080), width: 2),
                                   ),
                                 ),
                                 validator: (val) {
@@ -342,113 +446,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               const SizedBox(height: 24),
 
-                              // Submit Button
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: isTeacher
-                                      ? AppTheme.teacherAccent
-                                      : AppTheme.studentAccent,
-                                ),
-                                onPressed:
-                                    authState.status == AuthStatus.loading
-                                        ? null
-                                        : _submitLogin,
-                                child: authState.status == AuthStatus.loading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
+                              // Submit Primary Button (Teal CTA like Eazzio Payroll)
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF008080),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: authState.status == AuthStatus.loading
+                                      ? null
+                                      : _submitLogin,
+                                  child: authState.status == AuthStatus.loading
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: Colors.white),
-                                      )
-                                    : Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              isTeacher
-                                                  ? 'Enter Teacher Portal'
-                                                  : 'Enter Student Portal',
-                                              style: GoogleFonts.inter(
-                                                  fontWeight: FontWeight.w600),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                           ),
-                                          const SizedBox(width: 8),
-                                          const Icon(
-                                              Icons.arrow_forward_rounded,
-                                              size: 18),
-                                        ],
-                                      ),
-                              ),
-                              const SizedBox(height: 16),
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border:
-                                      Border.all(color: Colors.grey.shade200),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Quick Demo Login (Tap to fill):',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.textMuted,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: [
-                                        ActionChip(
-                                          avatar: const Icon(Icons.school,
-                                              size: 14),
-                                          label: const Text('Student (STU001)',
-                                              style: TextStyle(fontSize: 12)),
-                                          onPressed: () {
-                                            if (isTeacher) {
-                                              ref
-                                                  .read(authNotifierProvider
-                                                      .notifier)
-                                                  .selectPortal(
-                                                      UserRole.student);
-                                            }
-                                            _loginIdController.text = 'STU001';
-                                            _passwordController.text =
-                                                'password123';
-                                          },
+                                        )
+                                      : Text(
+                                          'Sign In',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                        ActionChip(
-                                          avatar: const Icon(Icons.person,
-                                              size: 14),
-                                          label: const Text(
-                                              'Teacher (teacher1)',
-                                              style: TextStyle(fontSize: 12)),
-                                          onPressed: () {
-                                            if (!isTeacher) {
-                                              ref
-                                                  .read(authNotifierProvider
-                                                      .notifier)
-                                                  .selectPortal(
-                                                      UserRole.teacher);
-                                            }
-                                            _loginIdController.text =
-                                                'teacher1@demo.com';
-                                            _passwordController.text =
-                                                'password123';
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ],
                                 ),
                               ),
                             ],
@@ -456,108 +485,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'One app, shared login, role-governed security.',
-                      style: GoogleFonts.inter(
-                          fontSize: 12, color: AppTheme.textMuted),
+                  ),
+                  const SizedBox(height: 36),
+
+                  // Footer
+                  Text(
+                    'v1.0.3 · Powered by Eazzio Technologies Pvt Ltd',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.black.withValues(alpha: 0.4),
+                      fontWeight: FontWeight.w500,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _PortalChoiceCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
+class _RoleVisual {
+  final String portalTag;
+  final String welcomeTitle;
+  final String welcomeSubtitle;
+  final Color accentColor;
+  final Color bgColor;
   final IconData icon;
-  final String? customIcon;
-  final bool isSelected;
-  final Color activeColor;
-  final VoidCallback onTap;
 
-  const _PortalChoiceCard({
-    required this.title,
-    required this.subtitle,
+  const _RoleVisual({
+    required this.portalTag,
+    required this.welcomeTitle,
+    required this.welcomeSubtitle,
+    required this.accentColor,
+    required this.bgColor,
     required this.icon,
-    this.customIcon,
-    required this.isSelected,
-    required this.activeColor,
-    required this.onTap,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? activeColor.withValues(alpha: 0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? activeColor : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Column(
-          children: [
-            if (customIcon != null)
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: activeColor.withValues(alpha: 0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          )
-                        ]
-                      : null,
-                ),
-                child: AppIcons.render(customIcon!, size: 36),
-              )
-            else
-              Icon(
-                icon,
-                size: 28,
-                color: isSelected ? activeColor : AppTheme.textMuted,
-              ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: isSelected ? activeColor : AppTheme.textDark,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 10,
-                color: isSelected
-                    ? activeColor.withValues(alpha: 0.8)
-                    : AppTheme.textMuted,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

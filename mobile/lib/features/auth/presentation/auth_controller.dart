@@ -102,11 +102,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Validate that authenticated user role matches intended role access
       if (state.selectedPortal == UserRole.student &&
           res.user!.role != UserRole.student) {
-        // Authenticated user is not a student
         state = state.copyWith(
           status: AuthStatus.unauthenticated,
-          errorMessage:
-              'Access Denied: This account has ${res.user!.role.name.toUpperCase()} privileges. Please use the Teacher Portal or correct portal.',
+          errorMessage: 'Invalid login credentials or incorrect portal selected.',
         );
         await _repo.logout();
         return false;
@@ -118,8 +116,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           res.user!.role != UserRole.principal) {
         state = state.copyWith(
           status: AuthStatus.unauthenticated,
-          errorMessage:
-              'Access Denied: This account has ${res.user!.role.name.toUpperCase()} privileges. Please switch to the Student Portal.',
+          errorMessage: 'Invalid login credentials or incorrect portal selected.',
         );
         await _repo.logout();
         return false;
@@ -134,7 +131,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } else {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
-        errorMessage: res.error ?? 'Invalid credentials or login failed',
+        errorMessage: res.error ?? 'Invalid email or password.',
       );
       return false;
     }
