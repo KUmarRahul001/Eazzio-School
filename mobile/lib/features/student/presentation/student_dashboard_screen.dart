@@ -119,7 +119,8 @@ class StudentDashboardScreen extends ConsumerWidget {
                     style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600, fontSize: 16)),
                 const SizedBox(height: 6),
-                Text(err.toString(),
+                Text(
+                    ref.read(apiClientProvider).parseErrorMessage(err),
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                         color: AppTheme.textMuted, fontSize: 13)),
@@ -433,26 +434,32 @@ class StudentDashboardScreen extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 4,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1E3A8A),
-                              borderRadius: BorderRadius.circular(2),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E3A8A),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "Today's Schedule",
-                            style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.textDark),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                "Today's Schedule",
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.textDark),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 4),
@@ -662,12 +669,15 @@ class StudentDashboardScreen extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Recent School Notices',
-                        style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textDark),
+                      Expanded(
+                        child: Text(
+                          'Recent School Notices',
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textDark),
+                        ),
                       ),
                       TextButton(
                         onPressed: () => Navigator.push(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -47,7 +48,16 @@ class _StudentAttendanceScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Error loading attendance: $err'),
+              const Icon(Icons.cloud_off_rounded, size: 40, color: AppTheme.errorRed),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  ApiClient.parseError(err),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+                ),
+              ),
               const SizedBox(height: 12),
               ElevatedButton(
                   onPressed: () => ref.refresh(studentAttendanceProvider),

@@ -1,7 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import '../storage/secure_storage_service.dart';
+
+final apiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient();
+});
 
 class ApiClient {
   late final Dio dio;
@@ -66,61 +71,79 @@ class ApiClient {
     dio.options.baseUrl = AppConfig.baseUrl;
   }
 
-  String parseErrorMessage(dynamic error) {
+  static String parseError(dynamic error) {
+    if (error == null) return 'An unexpected error occurred. Please try again.';
+
     if (error is DioException) {
-      final statusCode = error.response?.statusCode;
-      if (statusCode != null) {
-        if (statusCode == 401 || statusCode == 403) {
-          return 'Access denied or session expired. Please sign in again.';
+      if (error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.sendTimeout ||
+          error.type == DioExceptionType.receiveTimeout) {
+        return 'Connection timed out. Please check your internet connection.';
+      }
+
+      if (error.type == DioExceptionType.connectionError) {
+        return 'Unable to reach the school server. Please verify your internet connection.';
+      }
+
+      if (error.response != null) {
+        final statusCode = error.response?.statusCode;
+        final data = error.response?.data;
+
+        if (statusCode == 401) {
+          return 'Session expired. Please log in again.';
+        }
+        if (statusCode == 403) {
+          return 'Access restricted. Please contact your school administrator.';
         }
         if (statusCode == 404) {
-          return 'The requested resource was not found.';
+          return 'The requested record or resource was not found.';
         }
-        if (statusCode >= 500) {
-          return 'Service temporarily unavailable. Please try again later.';
+        if (statusCode != null && statusCode >= 500) {
+          return 'School server is temporarily unavailable. Please try again shortly.';
         }
-      }
 
-      if (error.response?.data != null) {
-        final data = error.response?.data;
-        String? msg;
-        if (data is Map) {
-          if (data.containsKey('error') && data['error'] is String) {
-            msg = data['error'] as String;
-          } else if (data.containsKey('message') && data['message'] is String) {
-            msg = data['message'] as String;
+        if (data is Map<String, dynamic>) {
+          final msg = data['message'] ?? data['error'];
+          if (msg is String && msg.trim().isNotEmpty) {
+            final lower = msg.toLowerCase();
+            if (!lower.contains('prisma') &&
+                !lower.contains('syntaxerror') &&
+                !lower.contains('stack') &&
+                !lower.contains('database') &&
+                !lower.contains('column') &&
+                !lower.contains('table') &&
+                !lower.contains('sql')) {
+              return msg.trim();
+            }
           }
         }
-        if (msg != null && msg.isNotEmpty) {
-          // Guard against raw SQL/Prisma or internal stack trace leaks
-          final lower = msg.toLowerCase();
-          if (lower.contains('prisma') ||
-              lower.contains('sql') ||
-              lower.contains('database') ||
-              lower.contains('syntax') ||
-              lower.contains('column') ||
-              lower.contains('table') ||
-              lower.contains('exception') ||
-              lower.contains('stack') ||
-              lower.contains('query') ||
-              lower.contains('neon') ||
-              lower.contains('jwt')) {
-            return 'An unexpected error occurred. Please try again.';
-          }
-          return msg;
-        }
+        return 'Unable to process request. Please try again.';
       }
 
-      if (error.type == DioExceptionType.connectionTimeout ||
-          error.type == DioExceptionType.receiveTimeout ||
-          error.type == DioExceptionType.sendTimeout) {
-        return 'Connection timed out. Please try again.';
-      }
-      if (error.type == DioExceptionType.connectionError) {
-        return 'Unable to connect to server. Please check your network connection.';
-      }
-      return 'Unable to complete request. Please try again.';
+      return 'Unable to complete request. Please check your connection and try again.';
     }
-    return 'An unexpected error occurred. Please try again.';
+
+    final errStr = error.toString();
+    final lower = errStr.toLowerCase();
+    if (lower.contains('dioexception') ||
+        lower.contains('xmlhttprequest') ||
+        lower.contains('socketexception') ||
+        lower.contains('connection refused') ||
+        lower.contains('failed host lookup') ||
+        lower.contains('network') ||
+        lower.contains('cors')) {
+      return 'Unable to connect. Please check your internet connection and try again.';
+    }
+
+    if (errStr.startsWith('Exception: ')) {
+      final clean = errStr.substring(11).trim();
+      if (!clean.toLowerCase().contains('dioexception')) {
+        return clean;
+      }
+    }
+
+    return 'Unable to load data. Please check your connection and try again.';
   }
+
+  String parseErrorMessage(dynamic error) => parseError(error);
 }

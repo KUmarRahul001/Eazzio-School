@@ -69,7 +69,11 @@ class SecureStorageService {
     }
     if (str == null) return null;
     try {
-      return jsonDecode(str) as Map<String, dynamic>;
+      final decoded = jsonDecode(str);
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      }
+      return null;
     } catch (_) {
       return null;
     }

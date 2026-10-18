@@ -35,7 +35,16 @@ class TeacherNoticesScreen extends ConsumerWidget {
       ),
       body: noticesAsync.when(
         loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 90),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              ref.read(apiClientProvider).parseErrorMessage(err),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+            ),
+          ),
+        ),
         data: (notices) {
           if (notices.isEmpty) {
             return Center(

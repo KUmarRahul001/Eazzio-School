@@ -62,8 +62,20 @@ class TeacherDashboardScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.cloud_off, size: 48, color: AppTheme.errorRed),
               const SizedBox(height: 12),
-              Text('Error loading dashboard: $err'),
-              const SizedBox(height: 12),
+              Text(
+                'Could not load dashboard data',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  ref.read(apiClientProvider).parseErrorMessage(err),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+                ),
+              ),
+              const SizedBox(height: 16),
               ElevatedButton(
                   onPressed: () => ref.refresh(teacherDashboardProvider),
                   child: const Text('Retry')),

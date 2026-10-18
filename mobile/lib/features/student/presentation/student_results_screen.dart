@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
@@ -94,10 +95,14 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline,
+              const Icon(Icons.cloud_off_rounded,
                   size: 48, color: AppTheme.errorRed),
               const SizedBox(height: 12),
-              Text('Error loading exam schedules: $err'),
+              Text(
+                ApiClient.parseError(err),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+              ),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () => ref.refresh(studentExamTimetablesProvider),
@@ -263,7 +268,16 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen>
   Widget _buildResultsTab(AsyncValue<StudentResultGroup> resultsAsync) {
     return resultsAsync.when(
       loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 120),
-      error: (err, _) => Center(child: Text('Error loading results: $err')),
+      error: (err, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            ApiClient.parseError(err),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+          ),
+        ),
+      ),
       data: (group) {
         if (group.resultOnHold) {
           return Center(

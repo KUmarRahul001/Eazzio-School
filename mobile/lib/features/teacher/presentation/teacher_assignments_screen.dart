@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -170,7 +171,16 @@ class _TeacherAssignmentsScreenState
       ),
       body: assignmentsAsync.when(
         loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 110),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              ApiClient.parseError(err),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+            ),
+          ),
+        ),
         data: (assignments) {
           if (assignments.isEmpty) {
             return Center(

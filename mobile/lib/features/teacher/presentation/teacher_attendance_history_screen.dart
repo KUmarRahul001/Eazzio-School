@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -88,7 +89,23 @@ class _TeacherAttendanceHistoryScreenState
       ),
       body: classesAsync.when(
         loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 100),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.info_outline, size: 48, color: AppTheme.textMuted),
+                const SizedBox(height: 12),
+                Text(
+                  ApiClient.parseError(err),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textMuted),
+                ),
+              ],
+            ),
+          ),
+        ),
         data: (classes) {
           if (classes.isEmpty) {
             return Center(

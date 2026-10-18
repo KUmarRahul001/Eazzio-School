@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -36,7 +37,16 @@ class StudentNoticesScreen extends ConsumerWidget {
       ),
       body: noticesAsync.when(
         loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 95),
-        error: (err, _) => Center(child: Text('Error loading notices: $err')),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              ApiClient.parseError(err),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+            ),
+          ),
+        ),
         data: (notices) {
           if (notices.isNotEmpty) {
             NotificationService.markNoticesAsSeen(notices.map((n) => n.id).toList());

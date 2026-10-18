@@ -261,8 +261,23 @@ class _StudentFeesScreenState extends ConsumerState<StudentFeesScreen> {
           ? const SkeletonListLoader(itemCount: 4, itemHeight: 110)
           : feesAsync.when(
               loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 110),
-              error: (err, _) =>
-                  Center(child: Text('Error loading fees: $err')),
+              error: (err, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.cloud_off_rounded, size: 40, color: AppTheme.errorRed),
+                      const SizedBox(height: 8),
+                      Text(
+                        ref.read(apiClientProvider).parseErrorMessage(err),
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               data: (invoices) {
                 if (invoices.isEmpty) {
                   return Center(

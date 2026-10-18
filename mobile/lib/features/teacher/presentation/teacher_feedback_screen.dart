@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -166,7 +167,16 @@ class _TeacherFeedbackScreenState extends ConsumerState<TeacherFeedbackScreen> {
       ),
       body: feedbackAsync.when(
         loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 95),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              ApiClient.parseError(err),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+            ),
+          ),
+        ),
         data: (feedbacks) {
           if (feedbacks.isEmpty) {
             return Center(

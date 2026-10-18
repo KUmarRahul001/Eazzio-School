@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -34,8 +35,23 @@ class StudentAssignmentsScreen extends ConsumerWidget {
       ),
       body: assignmentsAsync.when(
         loading: () => const SkeletonListLoader(itemCount: 5, itemHeight: 100),
-        error: (err, _) =>
-            Center(child: Text('Error loading assignments: $err')),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.cloud_off_rounded, size: 40, color: AppTheme.errorRed),
+                const SizedBox(height: 8),
+                Text(
+                  ApiClient.parseError(err),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ),
         data: (assignments) {
           if (assignments.isEmpty) {
             return Center(

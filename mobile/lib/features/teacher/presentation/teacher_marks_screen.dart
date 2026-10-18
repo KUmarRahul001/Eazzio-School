@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
@@ -361,7 +362,16 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
       ),
       body: examsAsync.when(
         loading: () => const SkeletonListLoader(itemCount: 4, itemHeight: 120),
-        error: (err, _) => Center(child: Text('Error loading exams: $err')),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              ApiClient.parseError(err),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(color: AppTheme.textMuted, fontSize: 13),
+            ),
+          ),
+        ),
         data: (exams) {
           if (exams.isEmpty) {
             return Center(
