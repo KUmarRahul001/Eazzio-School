@@ -8,7 +8,7 @@ class AppConfig {
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
-    return 'http://100.124.111.44:5000/api';
+    return 'https://eazzio-school.onrender.com/api';
   }
 
   static String baseUrl = defaultBaseUrl;

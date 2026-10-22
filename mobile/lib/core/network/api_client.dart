@@ -36,7 +36,7 @@ class ApiClient {
             return handler.next(options);
           },
           onError: (DioException e, handler) {
-            debugPrint('❌ [HTTP ERROR] ${e.requestOptions.path} [${e.response?.statusCode}]');
+            debugPrint('❌ [HTTP ERROR] ${e.requestOptions.path} [${e.response?.statusCode}] (${e.type}: ${e.message})');
             return handler.next(e);
           },
         ),
@@ -90,7 +90,12 @@ class ApiClient {
         final data = error.response?.data;
 
         if (statusCode == 401) {
-          return 'Session expired. Please log in again.';
+          // If 401 returned from login endpoint itself, it means bad credentials
+          final data = error.response?.data;
+          if (data is Map<String, dynamic> && data['error'] != null) {
+            return data['error'].toString();
+          }
+          return 'Invalid credentials. Please check your login ID and password.';
         }
         if (statusCode == 403) {
           return 'Access restricted. Please contact your school administrator.';

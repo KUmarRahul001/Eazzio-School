@@ -63,7 +63,7 @@ class _RoleSelectionScreenState extends ConsumerState<RoleSelectionScreen>
 
                       // Clean Brand Logo
                       SizedBox(
-                        width: size.width * 0.65,
+                        width: size.width * 0.75,
                         child: Image.asset(
                           'assets/images/logo.png',
                           fit: BoxFit.contain,

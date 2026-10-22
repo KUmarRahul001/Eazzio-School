@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:eazzio_school/core/config/app_config.dart';
 import '../models/auth_user.dart';
 import 'auth_controller.dart';
 
@@ -55,58 +54,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           loginId: _loginIdController.text.trim(),
           password: _passwordController.text.trim(),
         );
-  }
-
-  void _showApiSettingsDialog() {
-    final controller = TextEditingController(text: AppConfig.baseUrl);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'API Server Settings',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Set backend base URL (e.g. http://100.124.111.44:5000/api):',
-              style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade700),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                labelText: 'Base URL',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF008080),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () {
-              AppConfig.setBaseUrl(controller.text.trim());
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('API URL updated: ${AppConfig.baseUrl}')),
-              );
-            },
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -180,22 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           fit: BoxFit.contain,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: _showApiSettingsDialog,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.settings_outlined,
-                            size: 20,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ),
+                      const SizedBox(width: 40), // Balances the portal toggle on the left
                     ],
                   ),
                   const SizedBox(height: 28),
