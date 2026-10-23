@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:eazzio_school/core/config/app_config.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
 import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
@@ -144,7 +145,7 @@ class TeacherNoticesScreen extends ConsumerWidget {
                             final rawUrl = attachmentUrl.toString();
                             final fullUrl = rawUrl.startsWith('http')
                                 ? rawUrl
-                                : 'http://localhost:5000$rawUrl';
+                                : '${AppConfig.uploadsBaseUrl}$rawUrl';
                             final uri = Uri.parse(fullUrl);
                             if (await canLaunchUrl(uri)) {
                               await launchUrl(uri,
