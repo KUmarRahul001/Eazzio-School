@@ -6,10 +6,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:eazzio_school/core/theme/app_theme.dart';
 
+/// Screen providing inline viewing capabilities for remote PDF documents.
+///
+/// Downloads the document at [pdfUrl] into a temporary local file, displays
+/// progress/error states, and renders the PDF with page count indicators.
 class PdfViewerScreen extends StatefulWidget {
+  /// Header title shown in the app bar.
   final String title;
+
+  /// Remote URL of the PDF document to display.
   final String pdfUrl;
 
+  /// Creates a [PdfViewerScreen] instance.
   const PdfViewerScreen({
     super.key,
     required this.title,
@@ -33,6 +41,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
     _downloadPdf();
   }
 
+  /// Downloads the PDF from [widget.pdfUrl] to a temporary directory on disk.
   Future<void> _downloadPdf() async {
     try {
       final dir = await getTemporaryDirectory();

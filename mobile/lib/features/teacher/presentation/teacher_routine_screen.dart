@@ -7,6 +7,7 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/teacher_models.dart';
 import 'teacher_dashboard_screen.dart';
 
+/// Riverpod provider returning weekly routine periods grouped by day of the week.
 final teacherRoutineProvider =
     FutureProvider.autoDispose<Map<String, List<TeacherRoutineItem>>>(
         (ref) async {
@@ -14,7 +15,14 @@ final teacherRoutineProvider =
   return await repo.getRoutine();
 });
 
+/// Screen displaying the teacher's weekly class routine / timetable.
+///
+/// Features:
+/// - Scrollable day-of-week tab bar (Monday through Saturday).
+/// - Card view per period indicating period index, subject, room number, course section, and time interval.
+/// - Pull-to-refresh integration.
 class TeacherRoutineScreen extends ConsumerWidget {
+  /// Constructs a [TeacherRoutineScreen].
   const TeacherRoutineScreen({super.key});
 
   @override

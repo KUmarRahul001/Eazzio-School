@@ -8,6 +8,7 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'teacher_dashboard_screen.dart';
 
+/// Riverpod provider returning school circulars and faculty notices.
 final teacherNoticesProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final user = ref.watch(authNotifierProvider).user;
@@ -16,7 +17,14 @@ final teacherNoticesProvider =
   return await repo.getNotices(schoolId: schoolId);
 });
 
+/// Screen displaying official announcements and notices directed to faculty members.
+///
+/// Features:
+/// - List of notices tagged by audience category (e.g. ALL, TEACHER).
+/// - Publication date formatting.
+/// - Attachment link handler opening external documents via [launchUrl].
 class TeacherNoticesScreen extends ConsumerWidget {
+  /// Constructs a [TeacherNoticesScreen].
   const TeacherNoticesScreen({super.key});
 
   @override

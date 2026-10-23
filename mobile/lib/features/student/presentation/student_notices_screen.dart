@@ -12,13 +12,22 @@ import 'package:eazzio_school/features/shared/presentation/pdf_viewer_screen.dar
 import 'notice_details_screen.dart';
 import 'student_dashboard_screen.dart';
 
+/// Auto-dispose provider retrieving official circulars and campus notices.
 final studentAllNoticesProvider =
     FutureProvider.autoDispose<List<NoticeItem>>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
   return await repo.getNotices();
 });
 
+/// Presentation screen listing official circulars, administrative alerts, and bulletins.
+///
+/// Features:
+/// - List of notices with audience tag, formatted publication date, title, and body preview.
+/// - Unread tracking: automatically marks loaded notices as seen in local storage via [NotificationService].
+/// - Quick attachment chip to view PDF files with [PdfViewerScreen].
+/// - Card tap navigation to [NoticeDetailsScreen] for full content display.
 class StudentNoticesScreen extends ConsumerWidget {
+  /// Creates a [StudentNoticesScreen] instance.
   const StudentNoticesScreen({super.key});
 
   @override

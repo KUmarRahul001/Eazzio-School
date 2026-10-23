@@ -7,7 +7,16 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import 'student_profile_screen.dart';
 import 'student_routine_screen.dart';
 
+/// Presentation screen showing classroom enrollment details, class teacher credentials,
+/// and subject instructors.
+///
+/// Features:
+/// - Class banner card presenting course title, section name, and academic session.
+/// - Assigned Class Teacher card highlighting lead instructor credentials.
+/// - Subject Instructors directory parsed dynamically from the weekly timetable via [studentRoutineProvider].
+/// - Integrated refresh action for both profile and routine providers.
 class StudentClassDetailsScreen extends ConsumerWidget {
+  /// Creates a [StudentClassDetailsScreen] instance.
   const StudentClassDetailsScreen({super.key});
 
   @override

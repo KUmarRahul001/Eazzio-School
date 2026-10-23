@@ -1,11 +1,24 @@
+/// Represents aggregated metric data and daily schedule for the teacher's dashboard view.
 class TeacherDashboardData {
+  /// Whether the teacher is currently assigned as a homeroom / class teacher.
   final bool hasHomeroom;
+
+  /// Display string of the assigned course or class name (or 'Unassigned').
   final String assignedCourse;
+
+  /// Total count of students under the teacher's primary course or homeroom.
   final int? studentCount;
+
+  /// Attendance rate percentage for the course.
   final int? courseAttendanceRate;
+
+  /// List of students recently recorded as absent.
   final List<AbsenteeItem> recentAbsentees;
+
+  /// Timetable routine schedule items for today.
   final List<TeacherRoutineItem> routine;
 
+  /// Constructs a [TeacherDashboardData] snapshot.
   TeacherDashboardData({
     required this.hasHomeroom,
     required this.assignedCourse,
@@ -15,6 +28,7 @@ class TeacherDashboardData {
     required this.routine,
   });
 
+  /// Deserializes a [TeacherDashboardData] from backend JSON payload.
   factory TeacherDashboardData.fromJson(Map<String, dynamic> json) {
     return TeacherDashboardData(
       hasHomeroom: json['hasHomeroom'] == true,
@@ -31,12 +45,21 @@ class TeacherDashboardData {
   }
 }
 
+/// Represents an individual student absentee record shown on the teacher dashboard.
 class AbsenteeItem {
+  /// Unique identifier of the student.
   final int studentId;
+
+  /// Full name of the absent student.
   final String name;
+
+  /// Class roll number of the student, if available.
   final String? rollNumber;
+
+  /// Date when the absence was recorded (e.g. `YYYY-MM-DD`).
   final String date;
 
+  /// Constructs an [AbsenteeItem].
   AbsenteeItem({
     required this.studentId,
     required this.name,
@@ -44,6 +67,7 @@ class AbsenteeItem {
     required this.date,
   });
 
+  /// Deserializes an [AbsenteeItem] from backend JSON payload.
   factory AbsenteeItem.fromJson(Map<String, dynamic> json) {
     return AbsenteeItem(
       studentId: json['studentId'] is int
@@ -56,16 +80,33 @@ class AbsenteeItem {
   }
 }
 
+/// Represents a period or timetable lecture slot in the teacher's routine schedule.
 class TeacherRoutineItem {
+  /// Unique routine record identifier.
   final int id;
+
+  /// Period number or label (e.g. "1", "2").
   final String period;
+
+  /// Name of the subject being taught during this slot.
   final String subject;
+
+  /// Day of the week for this timetable slot (e.g. "MONDAY").
   final String dayOfWeek;
+
+  /// Scheduled start time string (e.g. "09:00 AM").
   final String? startTime;
+
+  /// Scheduled end time string (e.g. "09:45 AM").
   final String? endTime;
+
+  /// Assigned classroom or hall number.
   final String? roomNo;
+
+  /// Formatted course and section name (e.g. "Grade 10-A").
   final String? courseName;
 
+  /// Constructs a [TeacherRoutineItem].
   TeacherRoutineItem({
     required this.id,
     required this.period,
@@ -77,6 +118,7 @@ class TeacherRoutineItem {
     this.courseName,
   });
 
+  /// Deserializes a [TeacherRoutineItem] from backend JSON payload.
   factory TeacherRoutineItem.fromJson(Map<String, dynamic> json) {
     String? courseStr;
     if (json['course'] != null) {
@@ -98,14 +140,27 @@ class TeacherRoutineItem {
   }
 }
 
+/// Represents a class / course assigned to the teacher, including enrolled student roster.
 class TeacherClassItem {
+  /// Unique identifier of the course.
   final int courseId;
+
+  /// Name or grade level of the course (e.g. "Grade 10").
   final String courseName;
+
+  /// Section identifier (e.g. "A").
   final String section;
+
+  /// Whether the teacher is the homeroom / class teacher for this class.
   final bool isHomeroom;
+
+  /// Subjects assigned to this class.
   final List<String> subjects;
+
+  /// Enrolled students roster in this class.
   final List<RosterStudent> students;
 
+  /// Constructs a [TeacherClassItem].
   TeacherClassItem({
     required this.courseId,
     required this.courseName,
@@ -115,6 +170,7 @@ class TeacherClassItem {
     required this.students,
   });
 
+  /// Deserializes a [TeacherClassItem] from backend JSON payload.
   factory TeacherClassItem.fromJson(Map<String, dynamic> json) {
     return TeacherClassItem(
       courseId: json['courseId'] is int
@@ -131,6 +187,7 @@ class TeacherClassItem {
     );
   }
 
+  /// Combined display label showing course name and section (e.g. "Grade 10-A").
   String get displayName => '$courseName-$section';
 
   @override
@@ -144,13 +201,24 @@ class TeacherClassItem {
   int get hashCode => courseId.hashCode;
 }
 
+/// Represents a student enrolled in a class roster for attendance and grading.
 class RosterStudent {
+  /// Internal database ID of the student.
   final int id;
+
+  /// School-assigned student admission ID string.
   final String studentId;
+
+  /// Full name of the student.
   final String name;
+
+  /// Roll number of the student in the class.
   final String? rollNumber;
+
+  /// Contact phone number of student/parent.
   final String? phone;
 
+  /// Constructs a [RosterStudent] model.
   RosterStudent({
     required this.id,
     required this.studentId,
@@ -159,6 +227,7 @@ class RosterStudent {
     this.phone,
   });
 
+  /// Deserializes a [RosterStudent] from backend JSON payload.
   factory RosterStudent.fromJson(Map<String, dynamic> json) {
     return RosterStudent(
       id: json['id'] is int
@@ -172,16 +241,33 @@ class RosterStudent {
   }
 }
 
+/// Represents a homework assignment created by a teacher.
 class TeacherAssignmentItem {
+  /// Unique identifier of the assignment.
   final int id;
+
+  /// Title of the assignment.
   final String title;
+
+  /// Detailed description or instructions for students.
   final String description;
+
+  /// Course ID to which this assignment belongs.
   final int courseId;
+
+  /// Display name of the course/section.
   final String? courseName;
+
+  /// Deadline date string for submission (e.g. `YYYY-MM-DD`).
   final String? dueDate;
+
+  /// Attachment URL (document/image) for assignment details.
   final String? attachmentUrl;
+
+  /// Timestamp when the assignment was created.
   final String createdAt;
 
+  /// Constructs a [TeacherAssignmentItem].
   TeacherAssignmentItem({
     required this.id,
     required this.title,
@@ -193,6 +279,7 @@ class TeacherAssignmentItem {
     required this.createdAt,
   });
 
+  /// Deserializes a [TeacherAssignmentItem] from backend JSON payload.
   factory TeacherAssignmentItem.fromJson(Map<String, dynamic> json) {
     return TeacherAssignmentItem(
       id: json['id'] is int
@@ -211,18 +298,39 @@ class TeacherAssignmentItem {
   }
 }
 
+/// Represents an examination created or graded by a teacher.
 class TeacherExamItem {
+  /// Unique identifier of the exam.
   final int id;
+
+  /// Name of the exam (e.g. "Midterm Examination", "Unit Test 1").
   final String examName;
+
+  /// Term period (e.g. "Term 1", "Semester 1").
   final String term;
+
+  /// Academic year string (e.g. "2026-2027").
   final String academicYear;
+
+  /// Type or category of exam (e.g. "GENERAL", "PRACTICAL").
   final String? examType;
+
+  /// Specific subject for this exam.
   final String? subject;
+
+  /// Maximum total achievable score / marks.
   final double? maxMarks;
+
+  /// Scheduled date string for the exam.
   final String? examDate;
+
+  /// Associated course ID.
   final int courseId;
+
+  /// Formatted course and section name.
   final String? courseName;
 
+  /// Constructs a [TeacherExamItem].
   TeacherExamItem({
     required this.id,
     required this.examName,
@@ -236,6 +344,7 @@ class TeacherExamItem {
     this.courseName,
   });
 
+  /// Deserializes a [TeacherExamItem] from backend JSON payload.
   factory TeacherExamItem.fromJson(Map<String, dynamic> json) {
     return TeacherExamItem(
       id: json['id'] is int
@@ -268,14 +377,27 @@ class TeacherExamItem {
   int get hashCode => id.hashCode;
 }
 
+/// Represents a single student's row in an exam marks sheet for entry and review.
 class MarksSheetStudentRow {
+  /// Internal student ID.
   final int studentId;
+
+  /// Student's full name.
   final String name;
+
+  /// Student's roll number in the class.
   final String rollNumber;
+
+  /// Marks obtained by the student in the exam.
   double? marksObtained;
+
+  /// Letter grade awarded (e.g. "A+", "B").
   String? grade;
+
+  /// Optional remarks or feedback note for this student.
   String? remarks;
 
+  /// Constructs a [MarksSheetStudentRow].
   MarksSheetStudentRow({
     required this.studentId,
     required this.name,
@@ -285,6 +407,7 @@ class MarksSheetStudentRow {
     this.remarks,
   });
 
+  /// Deserializes a [MarksSheetStudentRow] from backend JSON payload.
   factory MarksSheetStudentRow.fromJson(Map<String, dynamic> json) {
     return MarksSheetStudentRow(
       studentId: json['studentId'] is int
@@ -298,3 +421,4 @@ class MarksSheetStudentRow {
     );
   }
 }
+

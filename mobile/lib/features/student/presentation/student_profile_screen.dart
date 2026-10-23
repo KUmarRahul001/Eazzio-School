@@ -8,13 +8,24 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
+/// Auto-dispose provider retrieving the student's full personal and academic profile.
 final studentProfileProvider =
     FutureProvider.autoDispose<StudentFullProfile>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
   return await repo.getProfile();
 });
 
+/// Presentation screen managing student profile information, security credentials, and app logout.
+///
+/// Features:
+/// - Student identity summary with initial avatar, admission ID, class section, and roll number.
+/// - Enrollment records: roll number, class teacher name, admission date, and billing cycle.
+/// - Guardian information: parent names, address, and interactive phone number editing dialog.
+/// - Security: In-app password update dialog with current password verification.
+/// - Logout tile triggering account sign-out and auth state reset.
+/// - Pull-to-refresh integration.
 class StudentProfileScreen extends ConsumerStatefulWidget {
+  /// Creates a [StudentProfileScreen] instance.
   const StudentProfileScreen({super.key});
 
   @override
@@ -23,8 +34,13 @@ class StudentProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
+  /// Text editing controller for the existing user password.
   final _oldPasswordController = TextEditingController();
+
+  /// Text editing controller for the replacement password.
   final _newPasswordController = TextEditingController();
+
+  /// Text editing controller for updating contact phone number.
   final _phoneController = TextEditingController();
 
   @override

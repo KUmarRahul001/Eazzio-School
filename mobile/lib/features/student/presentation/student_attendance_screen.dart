@@ -8,13 +8,26 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
+/// Auto-dispose provider retrieving student attendance statistics and daily records.
+///
+/// Returns a [Map] with two keys:
+/// - `'stats'`: Aggregated percentages, total present, late, and absent days.
+/// - `'records'`: A list of typed [AttendanceRecord] entries.
 final studentAttendanceProvider =
     FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
   return await repo.getAttendance();
 });
 
+/// Presentation screen rendering the student's attendance records and performance metrics.
+///
+/// Features:
+/// - Summary percentage card with presence, tardiness, and absence count breakdown.
+/// - Status filters (ALL, PRESENT, LATE, ABSENT) and month/year date range picker.
+/// - History log showing recorded dates, verified teacher names, and status indicators.
+/// - Pull-to-refresh and network error recovery.
 class StudentAttendanceScreen extends ConsumerStatefulWidget {
+  /// Creates a [StudentAttendanceScreen] instance.
   const StudentAttendanceScreen({super.key});
 
   @override
@@ -24,8 +37,13 @@ class StudentAttendanceScreen extends ConsumerStatefulWidget {
 
 class _StudentAttendanceScreenState
     extends ConsumerState<StudentAttendanceScreen> {
+  /// Currently selected status filter chip value ('ALL', 'PRESENT', 'LATE', or 'ABSENT').
   String _selectedStatusFilter = 'ALL';
+
+  /// Currently selected calendar month for log filtering (1-12, or null for all).
   int? _selectedMonth; // null = all months, 1-12
+
+  /// Currently selected calendar year for log filtering (or null for all).
   int? _selectedYear;
 
   @override

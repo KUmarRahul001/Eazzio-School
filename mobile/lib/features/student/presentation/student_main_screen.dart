@@ -9,7 +9,18 @@ import 'student_fees_screen.dart';
 import 'student_results_screen.dart';
 import 'student_profile_screen.dart';
 
+/// Persistent root shell and navigation scaffold for the Student module.
+///
+/// Houses an [IndexedStack] preserving the state of seven tab destinations:
+/// - Index 0: [StudentDashboardScreen] (Overview, statistics, and quick actions)
+/// - Index 1: [StudentAttendanceScreen] (Attendance logs and calendar filters)
+/// - Index 2: [StudentRoutineScreen] (Weekly class routine timetable)
+/// - Index 3: [StudentAssignmentsScreen] (Homework and course tasks)
+/// - Index 4: [StudentFeesScreen] (Invoices, receipts, and Razorpay payments)
+/// - Index 5: [StudentResultsScreen] (Exam results and upcoming schedules)
+/// - Index 6: [StudentProfileScreen] (Personal records, password management, and logout)
 class StudentMainScreen extends StatefulWidget {
+  /// Creates a new [StudentMainScreen] instance.
   const StudentMainScreen({super.key});
 
   @override
@@ -17,8 +28,10 @@ class StudentMainScreen extends StatefulWidget {
 }
 
 class _StudentMainScreenState extends State<StudentMainScreen> {
+  /// Active tab index corresponding to the selected [NavigationBar] item.
   int _currentIndex = 0;
 
+  /// Ordered view list kept alive within the [IndexedStack].
   final List<Widget> _screens = const [
     StudentDashboardScreen(),
     StudentAttendanceScreen(),

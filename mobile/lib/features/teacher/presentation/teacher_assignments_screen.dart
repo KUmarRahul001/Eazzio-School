@@ -9,13 +9,21 @@ import '../models/teacher_models.dart';
 import 'teacher_dashboard_screen.dart';
 import 'teacher_attendance_screen.dart';
 
+/// Riverpod provider returning assignments created by or visible to the teacher.
 final teacherAssignmentsProvider =
     FutureProvider.autoDispose<List<TeacherAssignmentItem>>((ref) async {
   final repo = ref.watch(teacherRepositoryProvider);
   return await repo.getAssignments();
 });
 
+/// Screen allowing teachers to create, review, and delete homework assignments.
+///
+/// Features:
+/// - Floating Action Button opening a creation dialog with class selector and date picker.
+/// - List of existing assignments with course tags, due date badges, and deletion controls.
+/// - Pull-to-refresh integration.
 class TeacherAssignmentsScreen extends ConsumerStatefulWidget {
+  /// Constructs a [TeacherAssignmentsScreen].
   const TeacherAssignmentsScreen({super.key});
 
   @override
@@ -25,6 +33,7 @@ class TeacherAssignmentsScreen extends ConsumerStatefulWidget {
 
 class _TeacherAssignmentsScreenState
     extends ConsumerState<TeacherAssignmentsScreen> {
+  /// Displays a modal dialog to create a new assignment for one of the [classes].
   void _showCreateAssignmentDialog(List<TeacherClassItem> classes) {
     if (classes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

@@ -7,19 +7,29 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
+/// Auto-dispose provider fetching student examination scores, terminal marks, and hold flags.
 final studentResultsProvider =
     FutureProvider.autoDispose<StudentResultGroup>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
   return await repo.getResults();
 });
 
+/// Auto-dispose provider fetching published examination schedules and timetables.
 final studentExamTimetablesProvider =
     FutureProvider.autoDispose<List<ExamTimetableItem>>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
   return await repo.getExamTimetables();
 });
 
+/// Presentation screen rendering examination timetables and academic result cards.
+///
+/// Features:
+/// - Tab 1 (Academic Results): Displays overall performance percentages, pass/fail status,
+///   subject-level marks breakdowns, and result-on-hold warning notices.
+/// - Tab 2 (Exam Schedules): Lists upcoming examination series, date timetables, subject timings,
+///   maximum marks, and examination room assignments.
 class StudentResultsScreen extends ConsumerStatefulWidget {
+  /// Creates a [StudentResultsScreen] instance.
   const StudentResultsScreen({super.key});
 
   @override
@@ -29,6 +39,7 @@ class StudentResultsScreen extends ConsumerStatefulWidget {
 
 class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen>
     with SingleTickerProviderStateMixin {
+  /// Controller managing switching between Academic Results and Exam Schedules tabs.
   late TabController _tabController;
 
   @override

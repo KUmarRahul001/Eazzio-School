@@ -6,9 +6,17 @@ import 'package:eazzio_school/core/theme/app_theme.dart';
 import '../models/student_models.dart';
 import 'package:eazzio_school/features/shared/presentation/pdf_viewer_screen.dart';
 
+/// Presentation screen displaying the full details, formatted body, and attachments of a notice.
+///
+/// Features:
+/// - Target audience badge and formatted date header.
+/// - Unabridged notice headline and multi-paragraph content.
+/// - Embedded PDF document attachment preview card routing to [PdfViewerScreen].
 class NoticeDetailsScreen extends StatelessWidget {
+  /// The [NoticeItem] model whose details and attachments are displayed.
   final NoticeItem notice;
 
+  /// Creates a [NoticeDetailsScreen] for the given [notice].
   const NoticeDetailsScreen({super.key, required this.notice});
 
   @override

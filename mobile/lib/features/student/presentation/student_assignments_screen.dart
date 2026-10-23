@@ -10,13 +10,22 @@ import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 import 'package:eazzio_school/features/shared/presentation/pdf_viewer_screen.dart';
 
+/// Auto-dispose provider fetching assigned homework and tasks for the student's class.
 final studentAssignmentsProvider =
     FutureProvider.autoDispose<List<AssignmentItem>>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
   return await repo.getAssignments();
 });
 
+/// Presentation screen listing homework and coursework assignments.
+///
+/// Features:
+/// - List of class assignments with title, description, instructor, and course tags.
+/// - Overdue and pending due date chips.
+/// - Direct PDF viewer integration for downloadable attachment files via [PdfViewerScreen].
+/// - Pull-to-refresh and network error handling.
 class StudentAssignmentsScreen extends ConsumerWidget {
+  /// Creates a [StudentAssignmentsScreen] instance.
   const StudentAssignmentsScreen({super.key});
 
   @override

@@ -9,7 +9,15 @@ import '../models/teacher_models.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_dashboard_screen.dart';
 
+/// Screen displaying previous student attendance records by class and date.
+///
+/// Features:
+/// - Class selection dropdown.
+/// - Scrollable list of recorded attendance dates.
+/// - Attendance summary counters (total students, present, absent, late).
+/// - Detailed student list showing individual attendance status.
 class TeacherAttendanceHistoryScreen extends ConsumerStatefulWidget {
+  /// Constructs a [TeacherAttendanceHistoryScreen].
   const TeacherAttendanceHistoryScreen({super.key});
 
   @override
@@ -19,13 +27,25 @@ class TeacherAttendanceHistoryScreen extends ConsumerStatefulWidget {
 
 class _TeacherAttendanceHistoryScreenState
     extends ConsumerState<TeacherAttendanceHistoryScreen> {
+  /// Currently selected class to inspect.
   TeacherClassItem? _selectedClass;
+
+  /// Selected attendance date string (ISO format).
   String? _selectedDate;
+
+  /// Available dates for which attendance records exist for the selected class.
   List<String> _dates = [];
+
+  /// Attendance records for the selected date and class.
   List<Map<String, dynamic>> _records = [];
+
+  /// Whether dates are actively being loaded.
   bool _isLoadingDates = false;
+
+  /// Whether records for the selected date are actively being loaded.
   bool _isLoadingRecords = false;
 
+  /// Fetches available attendance dates for a given [courseId].
   Future<void> _loadDates(int courseId) async {
     setState(() {
       _isLoadingDates = true;
@@ -57,6 +77,7 @@ class _TeacherAttendanceHistoryScreenState
     }
   }
 
+  /// Fetches attendance records for the given [dateStr] and [courseId].
   Future<void> _loadRecords(String dateStr, int courseId) async {
     setState(() => _isLoadingRecords = true);
     try {

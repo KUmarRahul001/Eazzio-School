@@ -8,13 +8,23 @@ import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
+/// Auto-dispose provider fetching the student's fee invoices and payment records.
 final studentFeesProvider =
     FutureProvider.autoDispose<List<FeeInvoiceItem>>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
   return await repo.getFees();
 });
 
+/// Presentation screen managing student fee accounts, invoices, and online payments.
+///
+/// Features:
+/// - Aggregated account summary showing total assessed fees, paid amount, and outstanding dues.
+/// - Invoice listing with payment status tags (PAID, PARTIAL, PENDING).
+/// - In-app online payment processing powered by [Razorpay].
+/// - Server-side payment signature verification.
+/// - Detailed receipt view dialog with school, student, and transaction voucher metadata.
 class StudentFeesScreen extends ConsumerStatefulWidget {
+  /// Creates a [StudentFeesScreen] instance.
   const StudentFeesScreen({super.key});
 
   @override
@@ -22,8 +32,13 @@ class StudentFeesScreen extends ConsumerStatefulWidget {
 }
 
 class _StudentFeesScreenState extends ConsumerState<StudentFeesScreen> {
+  /// Native payment gateway bridge instance for handling online payments.
   late Razorpay _razorpay;
+
+  /// Whether a payment checkout or server verification request is active.
   bool _isProcessing = false;
+
+  /// Identifier of the invoice currently being processed in checkout.
   int? _activeInvoiceId;
 
   @override

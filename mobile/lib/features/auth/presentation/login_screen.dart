@@ -5,7 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../models/auth_user.dart';
 import 'auth_controller.dart';
 
+/// Screen facilitating user login for students and teachers.
+///
+/// Adapts its visual branding (titles, accents, input placeholders) based on
+/// the portal selected on the preceding role selection screen.
 class LoginScreen extends ConsumerStatefulWidget {
+  /// Creates the login screen widget.
   const LoginScreen({super.key});
 
   @override
@@ -46,6 +51,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     super.dispose();
   }
 
+  /// Validates input credentials and dispatches the authentication request
+  /// to [authNotifierProvider].
   Future<void> _submitLogin() async {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
@@ -440,6 +447,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 }
 
+/// Helper model encapsulating role-specific visual assets, labels, and themes.
 class _RoleVisual {
   final String portalTag;
   final String welcomeTitle;

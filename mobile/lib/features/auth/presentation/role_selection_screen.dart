@@ -5,7 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:eazzio_school/features/auth/models/auth_user.dart';
 import 'auth_controller.dart';
 
+/// Landing screen that prompts users to select their target portal (Student or Teacher).
+///
+/// Features clean animated role cards that navigate to the credential login screen
+/// pre-configured with the chosen role.
 class RoleSelectionScreen extends ConsumerStatefulWidget {
+  /// Creates the role selection screen widget.
   const RoleSelectionScreen({super.key});
 
   @override
@@ -148,6 +153,7 @@ class _RoleSelectionScreenState extends ConsumerState<RoleSelectionScreen>
   }
 }
 
+/// Interactive button card representing a specific user role selection.
 class _AccountRoleCard extends StatefulWidget {
   final String title;
   final IconData icon;

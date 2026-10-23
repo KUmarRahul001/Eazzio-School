@@ -6,7 +6,15 @@ import 'package:eazzio_school/core/theme/app_theme.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'teacher_dashboard_screen.dart';
 
+/// Screen displaying faculty profile information, school credentials, and logout controls.
+///
+/// Features:
+/// - User profile avatar and personal credentials.
+/// - Assigned homeroom class indicator.
+/// - Active API server endpoint information.
+/// - Logout confirmation dialog.
 class TeacherProfileScreen extends ConsumerWidget {
+  /// Constructs a [TeacherProfileScreen].
   const TeacherProfileScreen({super.key});
 
   @override

@@ -8,7 +8,19 @@ import 'teacher_routine_screen.dart';
 import 'teacher_marks_screen.dart';
 import 'teacher_profile_screen.dart';
 
+/// Root navigation screen for the Teacher portal.
+///
+/// Houses the primary [NavigationBar] destination tabs:
+/// - Dashboard / Home: Summary metrics and quick actions.
+/// - Roll: Class attendance taking and status toggling.
+/// - Tasks: Assignment creation and management.
+/// - Routine: Weekly timetable view.
+/// - Marks: Exam marks entry and grade sheets.
+/// - Profile: Teacher account information and logout.
+///
+/// Uses an [IndexedStack] to preserve screen state across tab switches.
 class TeacherMainScreen extends StatefulWidget {
+  /// Constructs a [TeacherMainScreen].
   const TeacherMainScreen({super.key});
 
   @override
@@ -16,8 +28,10 @@ class TeacherMainScreen extends StatefulWidget {
 }
 
 class _TeacherMainScreenState extends State<TeacherMainScreen> {
+  /// Current index of the selected bottom navigation bar destination.
   int _currentIndex = 0;
 
+  /// Ordered list of primary teacher destination screens.
   final List<Widget> _screens = const [
     TeacherDashboardScreen(),
     TeacherAttendanceScreen(),

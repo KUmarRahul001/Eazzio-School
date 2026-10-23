@@ -8,13 +8,23 @@ import '../models/teacher_models.dart';
 import 'teacher_dashboard_screen.dart';
 import 'teacher_attendance_screen.dart';
 
+/// Riverpod provider returning all exams accessible to the teacher.
 final teacherExamsProvider =
     FutureProvider.autoDispose<List<TeacherExamItem>>((ref) async {
   final repo = ref.watch(teacherRepositoryProvider);
   return await repo.getExams();
 });
 
+/// Interactive screen allowing teachers to create exams and enter student marks/grades.
+///
+/// Features:
+/// - Dropdown or chip selection of exams.
+/// - Subject and Max Marks configuration.
+/// - Editable student marks sheet table with inline score input.
+/// - Client-side validation ensuring marks do not exceed maximum achievable score.
+/// - Dialog to create new tests and exams (Weekly, Surprise, Term exams, etc.).
 class TeacherMarksScreen extends ConsumerStatefulWidget {
+  /// Constructs a [TeacherMarksScreen].
   const TeacherMarksScreen({super.key});
 
   @override
@@ -22,11 +32,22 @@ class TeacherMarksScreen extends ConsumerStatefulWidget {
 }
 
 class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
+  /// Currently selected exam item.
   TeacherExamItem? _selectedExam;
+
+  /// Current subject being graded.
   String _subject = '';
+
+  /// Maximum marks value for this exam and subject.
   double _maxMarks = 100.0;
+
+  /// Roster of students and their marks in the loaded sheet.
   List<MarksSheetStudentRow> _studentRows = [];
+
+  /// Whether marks sheet is currently loading from network.
   bool _isLoadingSheet = false;
+
+  /// Whether updated marks are currently saving to backend.
   bool _isSavingMarks = false;
 
   final TextEditingController _subjectController = TextEditingController();
@@ -43,6 +64,7 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
     super.dispose();
   }
 
+  /// Loads the student marks sheet for [exam] and optional [customSubject].
   Future<void> _loadMarksSheet(TeacherExamItem exam,
       {String? customSubject}) async {
     final sub = (customSubject ?? exam.subject ?? 'General').trim();
@@ -84,6 +106,7 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
     }
   }
 
+  /// Validates inputs and persists entered student marks to the backend.
   Future<void> _saveMarks() async {
     if (_selectedExam == null || _studentRows.isEmpty) return;
 
@@ -157,6 +180,7 @@ class _TeacherMarksScreenState extends ConsumerState<TeacherMarksScreen> {
     }
   }
 
+  /// Displays dialog allowing the teacher to define a new test or exam schedule.
   Future<void> _showCreateExamDialog() async {
     final classesAsync = ref.read(teacherClassesProvider);
     final classes = classesAsync.value ?? [];

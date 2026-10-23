@@ -8,13 +8,21 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_dashboard_screen.dart';
 
+/// Riverpod provider returning student remarks and feedback records.
 final teacherFeedbackProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final repo = ref.watch(teacherRepositoryProvider);
   return await repo.getFeedbacks();
 });
 
+/// Screen allowing teachers to review and post feedback remarks for students.
+///
+/// Features:
+/// - Student selection modal dialog with multi-line note entry.
+/// - Feed list of feedback records showing target student details and timestamps.
+/// - Pull-to-refresh integration.
 class TeacherFeedbackScreen extends ConsumerStatefulWidget {
+  /// Constructs a [TeacherFeedbackScreen].
   const TeacherFeedbackScreen({super.key});
 
   @override
@@ -33,6 +41,7 @@ class _TeacherFeedbackScreenState extends ConsumerState<TeacherFeedbackScreen> {
     super.dispose();
   }
 
+  /// Displays dialog allowing the teacher to select a student and submit a remark.
   void _showCreateFeedbackDialog() {
     final classesAsync = ref.read(teacherClassesProvider);
     classesAsync.whenData((classes) {

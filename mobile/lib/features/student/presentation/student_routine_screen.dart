@@ -7,13 +7,23 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/student_models.dart';
 import 'student_dashboard_screen.dart';
 
+/// Auto-dispose provider fetching the student's weekly timetable routine.
+///
+/// Returns a map grouping weekday strings (e.g. 'Monday', 'Tuesday') to their list of [RoutineItem]s.
 final studentRoutineProvider =
     FutureProvider.autoDispose<Map<String, List<RoutineItem>>>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
   return await repo.getRoutine();
 });
 
+/// Presentation screen rendering the student's weekly class timetable.
+///
+/// Features:
+/// - Tabbed horizontal navigation for each day of the week (Monday through Saturday).
+/// - Period slot cards showing subject name, start & end time, room number, and teacher name.
+/// - Pull-to-refresh and empty-state placeholders for free days.
 class StudentRoutineScreen extends ConsumerWidget {
+  /// Creates a [StudentRoutineScreen] instance.
   const StudentRoutineScreen({super.key});
 
   @override

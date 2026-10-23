@@ -10,13 +10,23 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/teacher_models.dart';
 import 'teacher_dashboard_screen.dart';
 
+/// Riverpod provider delivering the list of classes assigned to the active teacher.
 final teacherClassesProvider =
     FutureProvider.autoDispose<List<TeacherClassItem>>((ref) async {
   final repo = ref.watch(teacherRepositoryProvider);
   return await repo.getMyClasses();
 });
 
+/// Interactive screen allowing teachers to mark student attendance.
+///
+/// Features:
+/// - Class/section selection dropdown.
+/// - Date picker for historical or current day attendance entry.
+/// - Bulk status toggles ("All Present", "All Absent").
+/// - Per-student status toggling (Present, Late, Absent).
+/// - Offline SQLite drafting via [LocalDatabaseService] with manual/auto sync.
 class TeacherAttendanceScreen extends ConsumerStatefulWidget {
+  /// Constructs a [TeacherAttendanceScreen].
   const TeacherAttendanceScreen({super.key});
 
   @override
@@ -26,12 +36,19 @@ class TeacherAttendanceScreen extends ConsumerStatefulWidget {
 
 class _TeacherAttendanceScreenState
     extends ConsumerState<TeacherAttendanceScreen> {
+  /// Currently selected attendance date.
   DateTime _selectedDate = DateTime.now();
+
+  /// Currently selected class item.
   TeacherClassItem? _selectedClass;
-  // studentId -> status ('PRESENT', 'ABSENT', 'LATE')
+
+  /// In-memory attendance mapping of student ID to status ('PRESENT', 'ABSENT', 'LATE').
   final Map<int, String> _attendanceMap = {};
+
+  /// Whether an attendance submission or sync is in progress.
   bool _isSubmitting = false;
 
+  /// Marks all students in [students] with the provided [status] string.
   void _markAll(String status, List<RosterStudent> students) {
     setState(() {
       for (final s in students) {
@@ -40,6 +57,7 @@ class _TeacherAttendanceScreenState
     });
   }
 
+  /// Submits the current attendance records to the server or stores offline draft on network error.
   Future<void> _submitAttendance() async {
     if (_selectedClass == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,6 +140,7 @@ class _TeacherAttendanceScreenState
     } catch (_) {}
   }
 
+  /// Shows a modal dialog listing locally queued offline attendance drafts.
   Future<void> _showOfflineDraftsDialog() async {
     final drafts = await LocalDatabaseService.getPendingAttendanceDrafts();
     if (!mounted) return;
@@ -184,6 +203,7 @@ class _TeacherAttendanceScreenState
     );
   }
 
+  /// Synchronizes offline drafts with backend server sequentially.
   Future<void> _syncOfflineDrafts(List<Map<String, dynamic>> drafts) async {
     setState(() => _isSubmitting = true);
     int successCount = 0;

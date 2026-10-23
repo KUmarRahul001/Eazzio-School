@@ -1,10 +1,18 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Service responsible for managing local offline data and cached drafts.
+///
+/// Handles storing, retrieving, updating, and clearing attendance drafts
+/// using [SharedPreferences] to ensure offline capability matches web behavior.
 class LocalDatabaseService {
   static const _draftsKey = 'offline_attendance_drafts';
 
-  // Attendance draft operations using SharedPreferences (matching frontend web localStorage model)
+  /// Saves an offline attendance draft record into local storage.
+  ///
+  /// Takes [courseId], [courseName], [date] formatted as ISO-8601 or YYYY-MM-DD,
+  /// and [records] list containing student attendance records.
+  /// Returns the newly generated draft unique ID.
   static Future<int> insertAttendanceDraft({
     required int courseId,
     required String courseName,
@@ -29,6 +37,9 @@ class LocalDatabaseService {
     return newId;
   }
 
+  /// Retrieves all local attendance drafts that are marked as 'PENDING'.
+  ///
+  /// Returns an empty list if no drafts exist or if parsing fails.
   static Future<List<Map<String, dynamic>>> getPendingAttendanceDrafts() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_draftsKey);
@@ -44,6 +55,9 @@ class LocalDatabaseService {
     }
   }
 
+  /// Updates the status of an existing attendance draft identified by [id].
+  ///
+  /// [status] typically represents states such as 'PENDING', 'SYNCED', or 'FAILED'.
   static Future<void> updateDraftStatus(int id, String status) async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_draftsKey);
@@ -61,6 +75,7 @@ class LocalDatabaseService {
     } catch (_) {}
   }
 
+  /// Deletes a cached attendance draft identified by its [id].
   static Future<void> deleteDraft(int id) async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_draftsKey);
@@ -75,7 +90,7 @@ class LocalDatabaseService {
     } catch (_) {}
   }
 
-  // Clear all local cached data and offline attendance drafts upon user logout
+  /// Clears all local cached data and offline attendance drafts upon user logout.
   static Future<void> clearUserData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_draftsKey);

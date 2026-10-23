@@ -5,6 +5,10 @@ import 'core/config/app_router.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 
+/// Entry point of the Eazzio-School mobile application.
+///
+/// Ensures Flutter engine bindings are initialized, configures local/remote
+/// push notification handlers, and wraps the app in a Riverpod [ProviderScope].
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.initialize();
@@ -15,7 +19,9 @@ void main() async {
   );
 }
 
+/// Root application widget that configures GoRouter and the global Material theme.
 class EazzioSchoolApp extends ConsumerWidget {
+  /// Creates the root [EazzioSchoolApp] widget instance.
   const EazzioSchoolApp({super.key});
 
   @override

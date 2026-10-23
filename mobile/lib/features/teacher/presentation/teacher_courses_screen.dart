@@ -7,7 +7,14 @@ import 'package:eazzio_school/core/widgets/skeleton_loader.dart';
 import '../models/teacher_models.dart';
 import 'teacher_attendance_screen.dart';
 
+/// Screen displaying assigned courses, subject allocations, and student rosters.
+///
+/// Features:
+/// - Horizontal selector cards for switching active course/section.
+/// - Search filter for querying students by name, roll number, or student admission ID.
+/// - Roster list cards with roll numbers and contact information.
 class TeacherCoursesScreen extends ConsumerStatefulWidget {
+  /// Constructs a [TeacherCoursesScreen].
   const TeacherCoursesScreen({super.key});
 
   @override
@@ -16,8 +23,12 @@ class TeacherCoursesScreen extends ConsumerStatefulWidget {
 }
 
 class _TeacherCoursesScreenState extends ConsumerState<TeacherCoursesScreen> {
+  /// Currently selected class to view roster.
   TeacherClassItem? _selectedClass;
+
+  /// Active search query string for filtering the student list.
   String _searchQuery = '';
+
   final TextEditingController _searchController = TextEditingController();
 
   @override
