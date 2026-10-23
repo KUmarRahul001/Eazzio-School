@@ -4,13 +4,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import '../storage/secure_storage_service.dart';
 
+/// Riverpod provider delivering a shared [ApiClient] instance across the application.
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient();
 });
 
+/// Centralized networking engine built on top of [Dio].
+/// 
+/// WHAT IT DOES:
+/// Dispatches all HTTP REST requests to the backend server, automatically injects
+/// JSON Web Tokens (JWT) for authentication, and normalizes server exceptions into friendly messages.
+/// 
+/// HOW IT WORKS:
+/// - Request Interceptor: Pulls active JWT from [SecureStorageService] and injects `Authorization: Bearer <token>`.
+/// - Error Interceptor: Catches 401/403 responses. If a session token expires, it purges credentials
+///   and invokes the [onUnauthorized] callback to route the user back to the login screen.
+/// - Error Parser: Decodes backend validation errors, timeout exceptions, and network drops into clear strings.
 class ApiClient {
+  /// The underlying Dio HTTP client instance with timeout and header options configured.
   late final Dio dio;
+
+  /// Secure storage dependency for retrieving and clearing auth tokens.
   final SecureStorageService _storageService;
+
+  /// Callback invoked when an active session receives a 401/403 unauthorized response.
   void Function()? onUnauthorized;
 
   ApiClient({SecureStorageService? storageService, this.onUnauthorized})
@@ -27,7 +44,7 @@ class ApiClient {
       ),
     );
 
-    // Only enable minimal logging in debug mode without sensitive body/token payload leaks
+    // Development logging interceptor: logs HTTP method, route, and error codes
     if (kDebugMode) {
       dio.interceptors.add(
         InterceptorsWrapper(
@@ -43,6 +60,7 @@ class ApiClient {
       );
     }
 
+    // Authentication interceptor: binds JWT token to requests and manages session expiration
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -54,7 +72,7 @@ class ApiClient {
         },
         onError: (DioException e, handler) async {
           if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
-            // Check if it's an unauthenticated token expiration
+            // Do not trigger global session logout if the error came from the login form itself
             if (e.requestOptions.path != '/auth/login') {
               await _storageService.clearAuth();
               onUnauthorized?.call();

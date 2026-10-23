@@ -3,6 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Hardware-backed secure persistence service for cryptographic tokens and session records.
+/// 
+/// WHAT IT DOES:
+/// Stores the sensitive JSON Web Token (JWT), user authentication state, and portal preferences.
+/// 
+/// HOW IT WORKS:
+/// - Uses [FlutterSecureStorage] which leverages Android Keystore / iOS Keychain under the hood.
+/// - Falls back smoothly to [SharedPreferences] in testing or Web environments if Keystore is unavailable.
 class SecureStorageService {
   static const _tokenKey = 'auth_jwt_token';
   static const _userDataKey = 'auth_user_data';
@@ -12,6 +20,7 @@ class SecureStorageService {
 
   SecureStorageService() : _storage = const FlutterSecureStorage();
 
+  /// Encrypts and writes the JWT token to local device keystore.
   Future<void> saveToken(String token) async {
     if (kIsWeb) {
       final prefs = await SharedPreferences.getInstance();

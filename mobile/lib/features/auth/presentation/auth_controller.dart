@@ -19,14 +19,20 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(apiClient: client, storageService: storage);
 });
 
+/// High-level authentication state lifecycle:
+/// - [initial]: App just launched, checking persisted token.
+/// - [authenticated]: Valid JWT active, user payload loaded.
+/// - [unauthenticated]: Logged out or session expired.
+/// - [loading]: Login request in flight.
 enum AuthStatus { initial, authenticated, unauthenticated, loading }
 
+/// Immutable state container holding session information and the active portal selection.
 class AuthState {
   final AuthStatus status;
   final AuthUser? user;
   final String? errorMessage;
-  final UserRole
-      selectedPortal; // portal choice on login screen (student or teacher)
+  /// Portal mode selected on login screen ([UserRole.student] or [UserRole.teacher]).
+  final UserRole selectedPortal;
 
   const AuthState({
     this.status = AuthStatus.initial,

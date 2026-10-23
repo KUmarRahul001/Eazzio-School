@@ -14,17 +14,20 @@ import 'teacher_notices_screen.dart';
 import 'teacher_feedback_screen.dart';
 import 'teacher_profile_screen.dart';
 
+/// Riverpod provider for the [TeacherRepository] API layer.
 final teacherRepositoryProvider = Provider<TeacherRepository>((ref) {
   final client = ref.watch(apiClientProvider);
   return TeacherRepository(client);
 });
 
+/// Async data provider loading teacher overview statistics, class assignments, and schedule.
 final teacherDashboardProvider =
     FutureProvider.autoDispose<TeacherDashboardData>((ref) async {
   final repo = ref.watch(teacherRepositoryProvider);
   return await repo.getDashboardSummary();
 });
 
+/// The primary landing dashboard for authenticated teachers and faculty.
 class TeacherDashboardScreen extends ConsumerWidget {
   const TeacherDashboardScreen({super.key});
 

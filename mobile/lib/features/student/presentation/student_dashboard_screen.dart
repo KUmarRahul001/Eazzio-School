@@ -16,11 +16,22 @@ import 'notice_details_screen.dart';
 import 'student_class_details_screen.dart';
 import 'student_results_screen.dart';
 
+/// Riverpod provider for the [StudentRepository] data layer.
 final studentRepositoryProvider = Provider<StudentRepository>((ref) {
   final client = ref.watch(apiClientProvider);
   return StudentRepository(client);
 });
 
+/// Async data provider fetching the student dashboard overview.
+/// 
+/// WHAT IT DOES:
+/// Retrieves student identity, attendance summary metrics, invoice pending status,
+/// today's lecture routine, and recent bulletin notices.
+/// 
+/// HOW IT WORKS:
+/// - Calls `GET /api/student/dashboard-summary` via [StudentRepository].
+/// - Inspects bulletin notices. If a fresh notice exists that was never displayed locally,
+///   triggers a system push notification via [NotificationService].
 final studentDashboardProvider =
     FutureProvider.autoDispose<StudentDashboardData>((ref) async {
   final repo = ref.watch(studentRepositoryProvider);
@@ -39,12 +50,14 @@ final studentDashboardProvider =
   return data;
 });
 
+/// Checks if there are any unread notices by comparing IDs against local SQLite storage.
 final unreadNoticesProvider = FutureProvider.autoDispose<bool>((ref) async {
   final dashboard = await ref.watch(studentDashboardProvider.future);
   final noticeIds = dashboard.notices.map((n) => n.id).toList();
   return await NotificationService.hasUnreadNotices(noticeIds);
 });
 
+/// The primary home screen for authenticated students.
 class StudentDashboardScreen extends ConsumerWidget {
   const StudentDashboardScreen({super.key});
 
