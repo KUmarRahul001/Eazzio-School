@@ -1,23 +1,24 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eazzio_school/features/auth/models/auth_user.dart';
 import 'package:eazzio_school/features/auth/presentation/auth_controller.dart';
 import 'package:eazzio_school/features/auth/presentation/role_selection_screen.dart';
 import 'package:eazzio_school/features/auth/presentation/login_screen.dart';
+import 'package:eazzio_school/features/splash/splash_screen.dart';
 import 'package:eazzio_school/features/student/presentation/student_main_screen.dart';
 import 'package:eazzio_school/features/teacher/presentation/teacher_main_screen.dart';
 
 /// Declarative navigation and role-based route guards for Eazzio School.
 /// 
 /// WHAT IT DOES:
-/// Manages the application navigation hierarchy (`/`, `/login`, `/student`, `/teacher`),
+/// Manages the application navigation hierarchy (`/splash`, `/role-selection`, `/login`, `/student`, `/teacher`),
 /// automatically redirecting users depending on their session state and permission level.
 /// 
 /// HOW IT WORKS:
 /// - Listens to [authNotifierProvider]. Whenever the user logs in, logs out, or switches role,
 ///   [RouterNotifier] notifies GoRouter to re-evaluate the redirect logic.
-/// - Unauthenticated users attempting to access protected screens are redirected to `/`.
+/// - Unauthenticated users attempting to access protected screens are redirected to `/role-selection`.
 /// - Logged-in students attempting to access `/teacher` are bounced back to `/student`.
 /// - Logged-in teachers/principals attempting to access `/student` are bounced back to `/teacher`.
 class RouterNotifier extends ChangeNotifier {
@@ -37,11 +38,17 @@ class RouterNotifier extends ChangeNotifier {
     final authState = _ref.read(authNotifierProvider);
     final isAuth = authState.status == AuthStatus.authenticated;
     final loc = state.matchedLocation;
-    final isAuthRoute = loc == '/' || loc == '/login';
+
+    // Splash screen handles its own timed transition
+    if (loc == '/') {
+      return null;
+    }
+
+    final isAuthRoute = loc == '/role-selection' || loc == '/login';
 
     // 1. Not logged in: Allow auth pages, but block protected student/teacher routes
     if (!isAuth) {
-      return isAuthRoute ? null : '/';
+      return isAuthRoute ? null : '/role-selection';
     }
 
     // 2. Already logged in: If user visits login/landing page, redirect straight to their portal
@@ -86,25 +93,77 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: notifier,
     redirect: notifier.redirect,
     routes: [
-      // Landing / Account Selection Screen
+      // Branded in-app splash screen with logo & smooth entry animation
       GoRoute(
         path: '/',
-        builder: (context, state) => const RoleSelectionScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SplashScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      ),
+      // Landing / Account Selection Screen
+      GoRoute(
+        path: '/role-selection',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const RoleSelectionScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curved = CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic);
+            return FadeTransition(
+              opacity: curved,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.05, 0),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            );
+          },
+        ),
       ),
       // Login Form Screen (toggles student vs teacher portal)
       GoRoute(
         path: '/login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const LoginScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curved = CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic);
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(curved),
+              child: child,
+            );
+          },
+        ),
       ),
       // Student Main Portal (bottom navigation: dashboard, routine, attendance, fees, results)
       GoRoute(
         path: '/student',
-        builder: (context, state) => const StudentMainScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const StudentMainScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
       ),
       // Teacher Main Portal (bottom navigation: dashboard, classes, marks, attendance, notices)
       GoRoute(
         path: '/teacher',
-        builder: (context, state) => const TeacherMainScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const TeacherMainScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
       ),
     ],
   );

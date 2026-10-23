@@ -34,11 +34,20 @@ dependencies:
   shared_preferences: ^2.3.4
   razorpay_flutter: ^1.4.7
   flutter_local_notifications: ^18.0.1
+  flutter_native_splash: ^2.4.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/logo.png
+  android_12:
+    image: assets/images/logo.png
+    color: "#FFFFFF"
+  fullscreen: false
 
 flutter:
   uses-material-design: true
