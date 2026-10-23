@@ -18,7 +18,12 @@ class SecureStorageService {
 
   final FlutterSecureStorage _storage;
 
-  SecureStorageService() : _storage = const FlutterSecureStorage();
+  SecureStorageService()
+      : _storage = const FlutterSecureStorage(
+          aOptions: AndroidOptions(
+            encryptedSharedPreferences: true,
+          ),
+        );
 
   /// Encrypts and writes the JWT token to local device keystore.
   Future<void> saveToken(String token) async {
@@ -27,12 +32,7 @@ class SecureStorageService {
       await prefs.setString(_tokenKey, token);
       return;
     }
-    try {
-      await _storage.write(key: _tokenKey, value: token);
-    } catch (_) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_tokenKey, token);
-    }
+    await _storage.write(key: _tokenKey, value: token);
   }
 
   Future<String?> getToken() async {
@@ -40,12 +40,7 @@ class SecureStorageService {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getString(_tokenKey);
     }
-    try {
-      return await _storage.read(key: _tokenKey);
-    } catch (_) {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_tokenKey);
-    }
+    return await _storage.read(key: _tokenKey);
   }
 
   Future<void> saveUserData(Map<String, dynamic> userMap) async {
@@ -55,12 +50,7 @@ class SecureStorageService {
       await prefs.setString(_userDataKey, str);
       return;
     }
-    try {
-      await _storage.write(key: _userDataKey, value: str);
-    } catch (_) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_userDataKey, str);
-    }
+    await _storage.write(key: _userDataKey, value: str);
   }
 
   Future<Map<String, dynamic>?> getUserData() async {
@@ -69,12 +59,7 @@ class SecureStorageService {
       final prefs = await SharedPreferences.getInstance();
       str = prefs.getString(_userDataKey);
     } else {
-      try {
-        str = await _storage.read(key: _userDataKey);
-      } catch (_) {
-        final prefs = await SharedPreferences.getInstance();
-        str = prefs.getString(_userDataKey);
-      }
+      str = await _storage.read(key: _userDataKey);
     }
     if (str == null) return null;
     try {

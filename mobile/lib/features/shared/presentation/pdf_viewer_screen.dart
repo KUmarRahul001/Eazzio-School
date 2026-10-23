@@ -44,6 +44,11 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   /// Downloads the PDF from [widget.pdfUrl] to a temporary directory on disk.
   Future<void> _downloadPdf() async {
     try {
+      final uri = Uri.tryParse(widget.pdfUrl);
+      if (uri == null || (!uri.isScheme('https') && !uri.isScheme('http'))) {
+        throw const FormatException('Invalid or insecure attachment URL.');
+      }
+
       final dir = await getTemporaryDirectory();
       final filename = 'doc_${DateTime.now().millisecondsSinceEpoch}.pdf';
       final file = File('${dir.path}/$filename');

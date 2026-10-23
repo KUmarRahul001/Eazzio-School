@@ -146,8 +146,8 @@ class TeacherNoticesScreen extends ConsumerWidget {
                             final fullUrl = rawUrl.startsWith('http')
                                 ? rawUrl
                                 : '${AppConfig.uploadsBaseUrl}$rawUrl';
-                            final uri = Uri.parse(fullUrl);
-                            if (await canLaunchUrl(uri)) {
+                            final uri = Uri.tryParse(fullUrl);
+                            if (uri != null && (uri.isScheme('http') || uri.isScheme('https')) && await canLaunchUrl(uri)) {
                               await launchUrl(uri,
                                   mode: LaunchMode.externalApplication);
                             } else {
