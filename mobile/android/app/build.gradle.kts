@@ -17,8 +17,8 @@ android {
 
     defaultConfig {
         applicationId = "com.eazzio.eazzio_school"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 24
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
